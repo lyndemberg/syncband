@@ -14,8 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.fragments.dialog.NovaSetlistDialog;
@@ -25,9 +27,18 @@ import java.util.List;
 
 public class SetlistsFragment extends Fragment {
 
+    List<String> setlists = null;
+
 
     public SetlistsFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // SETLISTS DEFAULT PARA VISUALIZAÇÃO
+        this.setlists = Arrays.asList(getResources().getStringArray(R.array.setlists_example));
     }
 
     @Override
@@ -42,18 +53,34 @@ public class SetlistsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle("Setlists");
 
-        // SETLISTS DEFAULT PARA VISUALIZAÇÃO
-        ListView listView = view.findViewById(R.id.listaSetlists);
-        List<String> setlists = Arrays.asList(getResources().getStringArray(R.array.setlists_example));
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, setlists);
+        ListView listView = view.findViewById(R.id.listaSetlists);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String valorEscolhido = setlists.get(i);
+
+                Bundle args = new Bundle();
+                args.putString("setlistAtual",valorEscolhido);
+
+                AbrirSetlist abrirSetlist = new AbrirSetlist();
+                abrirSetlist.setArguments(args);
+
+                getFragmentManager()
+                        .beginTransaction().replace(R.id.fragment_container,abrirSetlist)
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+
         //
 
         FloatingActionButton floatButton = view.findViewById(R.id.buttonAddSetlist);
         floatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentManager fragmentManager = getFragmentManager();
                 NovaSetlistDialog novaSetlistDialog = new NovaSetlistDialog();
                 novaSetlistDialog.show(fragmentManager,"nova_setlist_dialog");
             }

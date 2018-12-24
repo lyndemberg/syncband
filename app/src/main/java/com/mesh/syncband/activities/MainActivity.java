@@ -3,6 +3,8 @@ package com.mesh.syncband.activities;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container,new HomeFragment()).commit();
+                    .replace(R.id.fragment_container, new HomeFragment())
+                    .commit();
         }
     }
 
@@ -64,21 +67,24 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container,new HomeFragment()).commit();
+            fragmentManager(new HomeFragment());
         } else if (id == R.id.nav_server) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container,new ServerFragment()).commit();
+            fragmentManager(new ServerFragment());
         } else if (id == R.id.nav_setlists) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container,new SetlistsFragment()).commit();
+            fragmentManager(new SetlistsFragment());
         } else if (id == R.id.nav_perfil) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container,new PerfilFragment()).commit();
+            fragmentManager(new PerfilFragment());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void fragmentManager(Fragment fragment){
+        FragmentTransaction manager = getSupportFragmentManager().beginTransaction();
+        manager.replace(R.id.fragment_container, fragment);
+        manager.addToBackStack(null);
+        manager.commit();
     }
 }
