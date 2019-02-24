@@ -15,12 +15,17 @@ buildscript {
     }
 }
 
+ext {
+    roomVersion = '1.1.1'
+}
+
 allprojects {
     repositories {
         google()
         jcenter()
     }
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir
