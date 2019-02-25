@@ -1,5 +1,6 @@
 package com.mesh.syncband.database.dao;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -13,12 +14,15 @@ import java.util.List;
 @Dao
 public interface SetlistDao {
 
+
     @Query("SELECT * FROM setlist WHERE id=:id")
     Setlist findById(int id);
     @Query("SELECT * FROM setlist WHERE name=:name")
     Setlist findByName(String name);
     @Query("SELECT * FROM setlist")
     List<Setlist> getAll();
+    @Query("SELECT name FROM setlist")
+    List<String> getAllNames();
     @Insert
     void save(Setlist setlist);
     @Delete

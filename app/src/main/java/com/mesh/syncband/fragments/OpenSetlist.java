@@ -15,11 +15,11 @@ import com.mesh.syncband.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AbrirSetlist extends Fragment {
+public class OpenSetlist extends Fragment {
 
-    String setlistAtual = "";
+    String currentSetlist = "";
 
-    public AbrirSetlist() {
+    public OpenSetlist() {
         // Required empty public constructor
     }
 
@@ -40,8 +40,8 @@ public class AbrirSetlist extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getActivity().setTitle("Editar setlist");
-        this.setlistAtual = getArguments().getString("setlistAtual");
+        this.currentSetlist = getArguments().getString("currentSetlist");
         TextView textView = view.findViewById(R.id.setlistAberta);
-        textView.setText(setlistAtual);
+        textView.setText(currentSetlist);
     }
 }
