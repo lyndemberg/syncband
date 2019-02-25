@@ -2,6 +2,7 @@ package com.mesh.syncband.activities;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,8 +24,7 @@ import com.mesh.syncband.fragments.SetlistsFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final String HOME_FRAGMENT = "HOME_FRAGMENT";
     private static final String PERFIL_FRAGMENT = "PERFIL_FRAGMENT";
@@ -48,13 +48,37 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        NavigationView.OnNavigationItemSelectedListener navigationListener = new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                drawer.closeDrawer(GravityCompat.START);
+                int id = item.getItemId();
+                // Handle navigation view item clicks here.
+                if (id == R.id.nav_home) {
+                    replaceFragment(new HomeFragment(), HOME_FRAGMENT);
+                    return true;
+                } else if (id == R.id.nav_server) {
+                    replaceFragment(new ServerFragment(), SERVER_FRAGMENT);
+                    return true;
+                } else if (id == R.id.nav_setlists) {
+                    replaceFragment(new SetlistsFragment(), SETLISTS_FRAGMENT);
+                    return true;
+                } else if (id == R.id.nav_perfil) {
+                    replaceFragment(new PerfilFragment(), PERFIL_FRAGMENT);
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(navigationListener);
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeFragment())
                     .commit();
+            navigationView.setCheckedItem(R.id.nav_home);
         }
     }
 
@@ -62,57 +86,29 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        }else{
+            FragmentManager manager = getSupportFragmentManager();
+            Fragment home = manager.findFragmentByTag(HOME_FRAGMENT);
+            if(home != null){
+                finish();
+                return;
+            }
+            super.onBackPressed();
+            updateIconSelectedNavigationMenu(manager);
         }
-        FragmentManager manager = getSupportFragmentManager();
-        Fragment home = manager.findFragmentByTag(HOME_FRAGMENT);
-        if(home != null){
-            finish();
-            return;
-        }
-        super.onBackPressed();
-        updateIconNavigationMenu(manager);
     }
 
-    private void updateIconNavigationMenu(FragmentManager fragmentManager){
-
-        final Fragment server = fragmentManager.findFragmentByTag(SERVER_FRAGMENT);
-        if(server != null){
-            if(server.isVisible())
-                navigationView.setCheckedItem(R.id.nav_home);
+    private void updateIconSelectedNavigationMenu(FragmentManager fragmentManager){
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if(fragment instanceof HomeFragment){
+            navigationView.setCheckedItem(R.id.nav_home);
+        }else if(fragment instanceof PerfilFragment){
+            navigationView.setCheckedItem(R.id.nav_perfil);
+        }else if(fragment instanceof ServerFragment){
+            navigationView.setCheckedItem(R.id.nav_server);
+        }else if(fragment instanceof SetlistsFragment){
+            navigationView.setCheckedItem(R.id.nav_setlists);
         }
-
-        final Fragment setlists = fragmentManager.findFragmentByTag(SETLISTS_FRAGMENT);
-        if(setlists != null){
-            if(setlists.isVisible())
-                navigationView.setCheckedItem(R.id.nav_setlists);
-        }
-
-        final Fragment perfil = fragmentManager.findFragmentByTag(PERFIL_FRAGMENT);
-        if(perfil != null){
-            if(perfil.isVisible())
-                navigationView.setCheckedItem(R.id.nav_perfil);
-        }
-
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-
-        drawer.closeDrawer(GravityCompat.START);
-
-        int id = item.getItemId();
-        // Handle navigation view item clicks here.
-        if (id == R.id.nav_home) {
-            replaceFragment(new HomeFragment(), HOME_FRAGMENT);
-        } else if (id == R.id.nav_server) {
-            replaceFragment(new ServerFragment(), SERVER_FRAGMENT);
-        } else if (id == R.id.nav_setlists) {
-            replaceFragment(new SetlistsFragment(), SETLISTS_FRAGMENT);
-        } else if (id == R.id.nav_perfil) {
-            replaceFragment(new PerfilFragment(), PERFIL_FRAGMENT);
-        }
-        return true;
     }
 
     private void replaceFragment(Fragment fragment, String tag){
