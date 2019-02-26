@@ -10,7 +10,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="68dp"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_speaker_phone_black_40dp"
+        app:srcCompat="@drawable/ic_speaker_phone_black_40dp"
         app:layout_constraintEnd_toStartOf="@+id/textView2"
         app:layout_constraintHorizontal_bias="0.953"
         app:layout_constraintStart_toStartOf="parent"
