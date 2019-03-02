@@ -7,12 +7,9 @@ import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
 import com.mesh.syncband.database.converters.RoomTypeConverters;
-import com.mesh.syncband.database.dao.ProfileDao;
-import com.mesh.syncband.database.dao.SetlistDao;
-import com.mesh.syncband.database.dao.SongDao;
-import com.mesh.syncband.data.Profile;
-import com.mesh.syncband.data.Setlist;
-import com.mesh.syncband.data.Song;
+import com.mesh.syncband.model.Profile;
+import com.mesh.syncband.model.Setlist;
+import com.mesh.syncband.model.Song;
 
 @Database(entities = {
         Profile.class,
@@ -24,9 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
 
-    public abstract ProfileDao profileDao();
-    public abstract SetlistDao setlistDao();
-    public abstract SongDao songDao();
+    public abstract DaoAccess daoAccess();
 
     public static AppDatabase getAppDatabase(Context context){
         if(INSTANCE == null){

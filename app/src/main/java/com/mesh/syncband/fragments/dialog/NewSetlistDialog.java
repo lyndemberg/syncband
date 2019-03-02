@@ -1,23 +1,18 @@
 package com.mesh.syncband.fragments.dialog;
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.widget.EditText;
 
 import com.mesh.syncband.R;
-import com.mesh.syncband.data.Setlist;
+import com.mesh.syncband.model.Setlist;
 import com.mesh.syncband.database.AppDatabase;
-import com.mesh.syncband.database.dao.SetlistDao;
-import com.mesh.syncband.fragments.SetlistsFragment;
+import com.mesh.syncband.database.DaoAccess;
 
 import java.util.Date;
 
@@ -60,8 +55,8 @@ public class NewSetlistDialog extends DialogFragment {
 
         @Override
         protected Void doInBackground(Setlist... setlists) {
-            SetlistDao setlistDao = AppDatabase.getAppDatabase(getActivity()).setlistDao();
-            setlistDao.save(setlists[0]);
+            DaoAccess daoAccess = AppDatabase.getAppDatabase(getActivity()).daoAccess();
+            daoAccess.save(setlists[0]);
             return null;
         }
 

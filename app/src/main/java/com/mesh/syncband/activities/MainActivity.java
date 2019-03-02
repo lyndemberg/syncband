@@ -24,55 +24,36 @@ import com.mesh.syncband.fragments.SetlistsFragment;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static final String HOME_FRAGMENT = "HOME_FRAGMENT";
-    private static final String PERFIL_FRAGMENT = "PERFIL_FRAGMENT";
-    private static final String SERVER_FRAGMENT = "SERVER_FRAGMENT";
-    private static final String SETLISTS_FRAGMENT = "SETLISTS_FRAGMENT";
+    private static final String TAG = ".activities.MainActivity";
 
     DrawerLayout drawer;
-    Toolbar toolbar;
     NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView.OnNavigationItemSelectedListener navigationListener = new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                drawer.closeDrawer(GravityCompat.START);
-                int id = item.getItemId();
-                // Handle navigation view item clicks here.
-                if (id == R.id.nav_home) {
-                    replaceFragment(new HomeFragment(), HOME_FRAGMENT);
-                    return true;
-                } else if (id == R.id.nav_server) {
-                    replaceFragment(new ServerFragment(), SERVER_FRAGMENT);
-                    return true;
-                } else if (id == R.id.nav_setlists) {
-                    replaceFragment(new SetlistsFragment(), SETLISTS_FRAGMENT);
-                    return true;
-                } else if (id == R.id.nav_perfil) {
-                    replaceFragment(new PerfilFragment(), PERFIL_FRAGMENT);
-                    return true;
-                }
-                return false;
-            }
-        };
-
+        final FragmentManager manager = getSupportFragmentManager();
+                manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+                    @Override
+                    public void onBackStackChanged() {
+                        Log.d("BEGA","asdfdf");
+                        Log.d("BEGA", String.valueOf(manager.getBackStackEntryCount()));
+                    }
+                });
         navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(navigationListener);
+        navigationView.setNavigationItemSelectedListener(this);
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
@@ -87,19 +68,18 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }else{
-            FragmentManager manager = getSupportFragmentManager();
-            Fragment home = manager.findFragmentByTag(HOME_FRAGMENT);
-            if(home != null){
-                finish();
-                return;
-            }
+//            Fragment home = manager.findFragmentByTag(HomeFragment.class.getSimpleName());
+//            if(home != null){
+//                finish();
+//                return;
+//            }
             super.onBackPressed();
-            updateIconSelectedNavigationMenu(manager);
+            updateIconSelectedNavigationMenu();
         }
     }
 
-    private void updateIconSelectedNavigationMenu(FragmentManager fragmentManager){
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+    private void updateIconSelectedNavigationMenu(){
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         if(fragment instanceof HomeFragment){
             navigationView.setCheckedItem(R.id.nav_home);
         }else if(fragment instanceof PerfilFragment){
@@ -117,5 +97,45 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        drawer.closeDrawer(GravityCompat.START);
+
+        int id = item.getItemId();
+
+        Fragment fragment = null;
+        Class fragmentClass;
+        switch (id){
+            case R.id.nav_home:
+                fragmentClass = HomeFragment.class;
+                break;
+            case R.id.nav_server:
+                fragmentClass = ServerFragment.class;
+                break;
+            case R.id.nav_setlists:
+                fragmentClass = SetlistsFragment.class;
+                break;
+            case R.id.nav_perfil:
+                fragmentClass = PerfilFragment.class;
+                break;
+            default:
+                fragmentClass = HomeFragment.class;
+        }
+
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        replaceFragment(fragment,fragmentClass.getSimpleName());
+        item.setChecked(true);
+
+        setTitle(item.getTitle());
+
+        drawer.closeDrawers();
+        return true;
     }
 }

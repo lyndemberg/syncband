@@ -1,10 +1,9 @@
-package com.mesh.syncband.data;
+package com.mesh.syncband.model;
 
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
-import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity(foreignKeys = {
