@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Log.d("BEGA", String.valueOf(manager.getBackStackEntryCount()));
                     }
                 });
+
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
