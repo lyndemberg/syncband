@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">SyncBand</string>
 
+    <string name="scheme_api">https</string>
+    <string name="host_api">syncband.herokuapp.com</string>
+    <string name="path_api">api/song/search</string>
+
     <string-array name="setlists_example">
         <item>One</item>
         <item>Two</item>
@@ -9,6 +13,7 @@
         <item>Five</item>
         <item>Six</item>
     </string-array>
+
 
     <!-- TODO: Remove or change this placeholder text -->
 

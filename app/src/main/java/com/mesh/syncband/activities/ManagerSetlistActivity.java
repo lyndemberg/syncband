@@ -1,6 +1,7 @@
 package com.mesh.syncband.activities;
 
 import android.arch.lifecycle.Observer;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
@@ -54,7 +55,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
         songAdapter = new SongAdapter(this, songsList);
 
         listViewSongs = findViewById(R.id.list_songs);
-        listViewSongs.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listViewSongs.setAdapter(songAdapter);
 
         //load setlist
@@ -84,15 +84,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
             }
         });
 
-        listViewSongs.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                AppCompatCheckBox checkBox = view.findViewById(R.id.checkbox_song);
-                checkBox.setVisibility(AppCompatCheckBox.VISIBLE);
-                checkBox.setChecked(true);
-                return true;
-            }
-        });
 
         FloatingActionButton floatButton = findViewById(R.id.button_add_song);
         floatButton.setOnClickListener(new View.OnClickListener() {
@@ -133,7 +124,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
             SongDialog songDialog = new SongDialog();
             songDialog.show(transaction, SongDialog.class.getSimpleName());
         }else if(option.equals(SongAddOptionsDialog.SongOption.SPOTIFY)){
-
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
         }
     }
 

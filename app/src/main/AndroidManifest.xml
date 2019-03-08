@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mesh.syncband">
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -19,9 +20,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:label="@string/title_activity_manager_setlist"
-            android:name=".activities.ManagerSetlistActivity">
-        </activity>
+            android:name=".activities.ManagerSetlistActivity"
+            android:label="@string/title_activity_manager_setlist" />
+        <activity android:name=".activities.SearchActivity"></activity>
+
+        <service
+            android:name=".services.SearchService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
