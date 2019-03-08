@@ -14,17 +14,7 @@ import com.mesh.syncband.model.Song;
 import java.util.List;
 
 @Dao
-public interface DaoAccess {
-
-    //access @Entity Profile
-    @Query("SELECT * FROM profile")
-    LiveData<Profile> getProfile();
-    @Insert
-    void save(Profile profile);
-    @Delete
-    void delete(Profile profile);
-    @Update
-    void update(Profile updated);
+public interface SetlistDao {
 
     //access @Entity Setlist
     @Query("SELECT * FROM setlist WHERE id=:id")
@@ -42,13 +32,4 @@ public interface DaoAccess {
     @Update
     void update(Setlist updated);
 
-    //access @Entity Song
-    @Query("SELECT * FROM song WHERE idSetlist=:idSetlist")
-    LiveData<List<Song>> findAllBySetlist(int idSetlist);
-    @Insert
-    void save(Song song);
-    @Delete
-    void delete(Song song);
-    @Update
-    void update(Song updated);
 }

@@ -21,9 +21,11 @@ public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;
 
-    public abstract DaoAccess daoAccess();
+    abstract ProfileDao getProfileDao();
+    abstract SetlistDao getSetlistDao();
+    abstract SongDao getSongDao();
 
-    public static AppDatabase getAppDatabase(Context context){
+    static AppDatabase getAppDatabase(Context context){
         if(INSTANCE == null){
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class,"database-syncband")

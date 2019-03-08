@@ -1,6 +1,7 @@
 package com.mesh.syncband.fragments;
 
 import android.arch.lifecycle.Observer;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,17 +16,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.mesh.syncband.R;
+import com.mesh.syncband.activities.ManagerSetlistActivity;
 import com.mesh.syncband.database.AppDatabase;
-import com.mesh.syncband.database.DaoAccess;
+import com.mesh.syncband.database.SetlistRepository;
 import com.mesh.syncband.fragments.dialog.NewSetlistDialog;
+import com.mesh.syncband.model.Setlist;
 
 import java.util.List;
 
-public class SetlistsFragment extends Fragment implements NewSetlistDialog.SetListCreatedListener{
+public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSetlistListener{
 
     private ArrayAdapter<String> adapter;
     private List<String> setlists = null;
-    private DaoAccess daoAccess;
+    private SetlistRepository setlistRepository;
 
     public SetlistsFragment() {
         // Required empty public constructor
@@ -34,7 +37,7 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.SetLi
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        daoAccess = AppDatabase.getAppDatabase(getContext()).daoAccess();
+        setlistRepository = new SetlistRepository(getContext());
         adapter = new ArrayAdapter(getContext(),android.R.layout.simple_list_item_1);
     }
 
@@ -56,15 +59,9 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.SetLi
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String selected = setlists.get(i);
-                Bundle args = new Bundle();
-                args.putString("currentSetlist",selected);
-
-                OpenSetlist openSetlist = new OpenSetlist();
-                openSetlist.setArguments(args);
-                getFragmentManager()
-                        .beginTransaction().replace(R.id.fragment_container, openSetlist)
-                        .addToBackStack(null)
-                        .commit();
+                Intent intent = new Intent(getContext(), ManagerSetlistActivity.class);
+                intent.putExtra("currentSetlist",selected);
+                startActivity(intent);
             }
         });
 
@@ -87,46 +84,29 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.SetLi
     }
 
     private void refreshSetlists(){
-        daoAccess.getAllNames().observe(this, new Observer<List<String>>() {
+        setlistRepository.getAllNames().observe(this, new Observer<List<String>>() {
             @Override
             public void onChanged(@Nullable List<String> strings) {
-                adapter.clear();
-                setlists = strings;
-                adapter.addAll(setlists);
-                if (strings.isEmpty())
-                    getView().findViewById(R.id.setlistsMessage).setVisibility(View.VISIBLE);
-                else
-                    getView().findViewById(R.id.setlistsMessage).setVisibility(View.INVISIBLE);
+            adapter.clear();
+            setlists = strings;
+            adapter.addAll(setlists);
+            if (strings.isEmpty())
+                getView().findViewById(R.id.setlistsMessage).setVisibility(View.VISIBLE);
+            else
+                getView().findViewById(R.id.setlistsMessage).setVisibility(View.INVISIBLE);
             }
         });
     }
+
     @Override
     public void onStop() {
         super.onStop();
     }
 
+
     @Override
-    public void setlistCreated() {
+    public void toSave(Setlist setlist) {
+        setlistRepository.insertSetlist(setlist);
         refreshSetlists();
     }
-
-//    private class LoadSetlistsDatabase extends AsyncTask<Void,Void,List<String>>{
-//
-//        @Override
-//        protected List<String> doInBackground(Void... voids) {
-//            return setlistDao.getAllNames();
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<String> strings) {
-//            adapter.clear();
-//            setlists = strings;
-//            adapter.addAll(setlists);
-//            if (strings.isEmpty())
-//                getView().findViewById(R.id.setlistsMessage).setVisibility(View.VISIBLE);
-//            else
-//                getView().findViewById(R.id.setlistsMessage).setVisibility(View.INVISIBLE);
-//        }
-//    }
-
 }

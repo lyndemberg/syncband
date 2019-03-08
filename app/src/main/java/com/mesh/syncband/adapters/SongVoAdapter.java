@@ -12,15 +12,16 @@ import android.widget.TextView;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.model.Song;
+import com.mesh.syncband.valueobject.SongVo;
+
 import java.util.List;
 
-public class SongAdapter extends ArrayAdapter<Song> {
+public class SongVoAdapter extends ArrayAdapter<SongVo> {
 
     private Context ctx;
-    private List<Song> songs;
-    private List<AppCompatCheckBox> checkBoxList;
+    private List<SongVo> songs;
 
-    public SongAdapter(@NonNull Context context, @NonNull List<Song> data) {
+    public SongVoAdapter(@NonNull Context context, @NonNull List<SongVo> data) {
         super(context, 0, data);
         this.songs = data;
         this.ctx = context;
@@ -29,10 +30,10 @@ public class SongAdapter extends ArrayAdapter<Song> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        Song song = getItem(position);
+        SongVo song = getItem(position);
 
         if(convertView == null){
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.song_adapter_layout,parent,false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.song_result_item,parent,false);
 
         }
 
@@ -49,7 +50,7 @@ public class SongAdapter extends ArrayAdapter<Song> {
 
     @Nullable
     @Override
-    public Song getItem(int position) {
+    public SongVo getItem(int position) {
         return songs.get(position);
     }
 }

@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">SyncBand</string>
 
+    <string name="scheme_api">https</string>
+    <string name="host_api">syncband.herokuapp.com</string>
+    <string name="path_api">api/song/search</string>
+
     <string-array name="setlists_example">
         <item>One</item>
         <item>Two</item>
@@ -9,6 +13,7 @@
         <item>Five</item>
         <item>Six</item>
     </string-array>
+
 
     <!-- TODO: Remove or change this placeholder text -->
 
@@ -20,6 +25,7 @@
     <string name="title_activity_server">Server</string>
     <string name="title_activity_perfil">Perfil</string>
     <string name="title_activity_setlists">Setlists</string>
+    <string name="title_activity_manager_setlist">Editar setlist</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -27,3 +33,4 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 </resources>
+

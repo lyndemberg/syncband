@@ -5,19 +5,20 @@ import android.arch.lifecycle.Observer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.adapters.SongAdapter;
-import com.mesh.syncband.database.AppDatabase;
-import com.mesh.syncband.database.DaoAccess;
+import com.mesh.syncband.database.SetlistRepository;
+import com.mesh.syncband.database.SongRepository;
+import com.mesh.syncband.fragments.dialog.SongDialog;
 import com.mesh.syncband.model.Setlist;
 import com.mesh.syncband.model.Song;
 
@@ -29,7 +30,8 @@ import java.util.List;
 public class OpenSetlist extends Fragment {
 
     String currentSetlist = "";
-    private DaoAccess daoAccess;
+    private SetlistRepository setlistRepository;
+    private SongRepository songRepository;
     private SongAdapter songAdapter;
     private ListView listViewSongs;
     private Setlist setlist = null;
@@ -41,8 +43,9 @@ public class OpenSetlist extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        daoAccess = AppDatabase.getAppDatabase(getContext()).daoAccess();
-        songAdapter = new SongAdapter(getContext());
+        setlistRepository = new SetlistRepository(getContext());
+        songRepository = new SongRepository(getContext());
+//        songAdapter = new SongAdapter(getContext());
     }
 
     @Override
@@ -57,25 +60,41 @@ public class OpenSetlist extends Fragment {
         listViewSongs = view.findViewById(R.id.list_songs);
         listViewSongs.setAdapter(songAdapter);
         //load setlist
-        daoAccess.findByName(currentSetlist).observe(this,new Observer<Setlist>(){
+        setlistRepository.findByName(currentSetlist).observe(this,new Observer<Setlist>(){
             @Override
             public void onChanged(@Nullable Setlist set) {
-                setlist = set;
-                //load setlist songs
-                daoAccess.findAllBySetlist(setlist.getId()).observe(OpenSetlist.this, new Observer<List<Song>>() {
-                    @Override
-                    public void onChanged(@Nullable List<Song> songs) {
-                        songAdapter.clear();
-                        songAdapter.addAll(songs);
-                    }
-                });
-                //
-
+            setlist = set;
+            //load setlist songs
+                refreshSongs();
+            //
             }
         });
         //
 
+        FloatingActionButton floatButton = view.findViewById(R.id.button_add_song);
+        floatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+                SongDialog songDialog = new SongDialog();
+                songDialog.show(transaction,"dialog_fragment");
+            }
+        });
         return view;
+    }
+
+    private void refreshSongs(){
+        songRepository.findAllBySetlist(setlist.getId()).observe(OpenSetlist.this, new Observer<List<Song>>() {
+            @Override
+            public void onChanged(@Nullable List<Song> songs) {
+                songAdapter.clear();
+                songAdapter.addAll(songs);
+                if (songs.isEmpty())
+                    getView().findViewById(R.id.songs_message).setVisibility(View.VISIBLE);
+                else
+                    getView().findViewById(R.id.songs_message).setVisibility(View.INVISIBLE);
+            }
+        });
     }
 
     @Override

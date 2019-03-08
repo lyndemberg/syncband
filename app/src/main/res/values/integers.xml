@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="bpm_min">30</integer>
+    <integer name="bpm_max">280</integer>
+    <integer name="default_bpm">84</integer>
+</resources>

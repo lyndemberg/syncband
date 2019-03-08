@@ -6,6 +6,8 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(foreignKeys = {
     @ForeignKey(
         entity = Setlist.class,
@@ -16,7 +18,7 @@ import android.arch.persistence.room.PrimaryKey;
     )
 }
 )
-public class Song {
+public class Song implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
