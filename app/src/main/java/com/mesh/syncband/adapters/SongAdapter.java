@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -19,6 +20,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
 
 
     public static class SongHolder extends RecyclerView.ViewHolder{
+        final AppCompatCheckBox checkBox;
         final TextView labelSong;
         final TextView labelArtist;
         final TextView labelBpmValue;
@@ -28,17 +30,26 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
             labelSong = itemView.findViewById(R.id.label_song_name);
             labelArtist = itemView.findViewById(R.id.label_artist_name);
             labelBpmValue = itemView.findViewById(R.id.label_bpm_value);
+            checkBox = itemView.findViewById(R.id.check_song);
         }
     }
 
     private Context context;
     private List<Song> songs;
-    private final View.OnClickListener listener;
+    private View.OnClickListener onClickListener;
+    private boolean showCheckBox = false;
 
-    public SongAdapter(Context context, List<Song> data, View.OnClickListener listener) {
+    public SongAdapter(Context context, List<Song> data) {
         this.songs = data;
         this.context = context;
-        this.listener = listener;
+    }
+
+    public void setOnClickListener(View.OnClickListener clickListener){
+        this.onClickListener = clickListener;
+    }
+
+    public void setShowCheckBox(boolean show){
+        this.showCheckBox = show;
     }
 
     @NonNull
@@ -46,7 +57,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     public SongHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View viewRow = LayoutInflater.from(context)
                 .inflate(R.layout.song_adapter_layout, parent, false);
-        viewRow.setOnClickListener(listener);
+        viewRow.setOnClickListener(onClickListener);
         SongHolder holder = new SongHolder(viewRow);
         return holder;
     }
@@ -54,6 +65,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     @Override
     public void onBindViewHolder(@NonNull SongHolder holder, int position) {
         Song song = songs.get(position);
+        if(showCheckBox)
+            holder.checkBox.setVisibility(View.VISIBLE);
+        else
+            holder.checkBox.setVisibility(View.GONE);
+
         holder.labelSong.setText(song.getName());
         holder.labelArtist.setText(song.getArtist());
         holder.labelBpmValue.setText(song.getBpm()+"");
@@ -68,9 +84,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
         this.songs = data;
     }
 
-
     public Song getItem(int position) {
         return songs.get(position);
     }
+
 
 }

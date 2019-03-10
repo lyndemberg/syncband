@@ -13,11 +13,13 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.adapters.SongAdapter;
@@ -56,7 +58,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
 
         recyclerViewSongs = findViewById(R.id.list_songs);
 
-        songAdapter = new SongAdapter(this, new ArrayList<Song>(), new View.OnClickListener() {
+        songAdapter = new SongAdapter(this, new ArrayList<Song>());
+        songAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int itemPosition = recyclerViewSongs.getChildLayoutPosition(view);
@@ -118,6 +121,22 @@ public class ManagerSetlistActivity extends AppCompatActivity
     @Override
     public boolean onSupportNavigateUp() {
         super.onBackPressed();
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.manager_setlist_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==R.id.action_delete){
+            songAdapter.setShowCheckBox(true);
+            songAdapter.notifyDataSetChanged();
+        }
         return true;
     }
 
