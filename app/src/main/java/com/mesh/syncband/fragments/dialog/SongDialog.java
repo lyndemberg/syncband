@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.model.Song;
@@ -17,9 +18,9 @@ import com.mesh.syncband.model.Song;
 public class SongDialog extends DialogFragment {
 
     private Song song = null;
-    private NewSongListener listener;
+    private SongDialogListener listener;
 
-    public interface NewSongListener{
+    public interface SongDialogListener{
         void toSave(Song song);
         void toUpdate(Song song);
     }
@@ -34,7 +35,7 @@ public class SongDialog extends DialogFragment {
         if(getArguments() != null){
             song  = (Song) getArguments().get("song");
         }
-        listener = (NewSongListener) getActivity();
+        listener = (SongDialogListener) getActivity();
     }
 
     @Nullable
@@ -42,6 +43,7 @@ public class SongDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.song_dialog_fragment, container, false);
 
+        final TextView title = view.findViewById(R.id.song_dialog_title);
         final NumberPicker pickerBpm = view.findViewById(R.id.picker_bpm);
         final TextInputEditText inputNameSong = view.findViewById(R.id.input_name_song);
         final TextInputEditText inputNameArtist = view.findViewById(R.id.input_name_artist);
@@ -52,10 +54,12 @@ public class SongDialog extends DialogFragment {
         pickerBpm.setMaxValue(maxValue);
 
         if (song != null) {
+            title.setText("Editar musica");
             inputNameSong.setText(song.getName());
             inputNameArtist.setText(song.getArtist());
             pickerBpm.setValue(song.getBpm());
         }else{
+            title.setText("Nova musica");
             int defaultValue = getResources().getInteger(R.integer.default_bpm);
             pickerBpm.setValue(defaultValue);
         }

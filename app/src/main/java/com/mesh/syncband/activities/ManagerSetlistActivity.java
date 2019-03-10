@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerSetlistActivity extends AppCompatActivity
-        implements SongAddOptionsDialog.SongOptionsListener, SongDialog.NewSongListener {
+        implements SongAddOptionsDialog.SongOptionsListener, SongDialog.SongDialogListener {
 
     String currentSetlist = "";
     private SetlistRepository setlistRepository;
