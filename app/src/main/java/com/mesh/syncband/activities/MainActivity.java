@@ -26,7 +26,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static final String TAG = ".activities.MainActivity";
+    private static final String TAG = "activities.MainActivity";
 
     DrawerLayout drawer;
     NavigationView navigationView;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
+                    .replace(R.id.fragment_container, new HomeFragment(),HomeFragment.class.getSimpleName())
                     .commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
@@ -69,11 +69,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }else{
-//            Fragment home = manager.findFragmentByTag(HomeFragment.class.getSimpleName());
-//            if(home != null){
-//                finish();
-//                return;
-//            }
+            Fragment home = getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
+            if(home!=null && home.isVisible()){
+                finish();
+                return;
+            }
             super.onBackPressed();
             updateIconSelectedNavigationMenu();
         }
@@ -97,6 +97,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(null);
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        transaction.commit();
+    }
+
+    private void replaceWithoutAddToStack(Fragment fragment, String tag){
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment, tag);
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.commit();
     }
 
@@ -125,18 +134,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentClass = HomeFragment.class;
         }
 
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
+        Fragment fragmentByTag = getSupportFragmentManager().findFragmentByTag(fragmentClass.getSimpleName());
+        if(fragmentByTag!=null){
+            replaceFragment(fragmentByTag,fragmentClass.getSimpleName());
+        }else{
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            replaceFragment(fragment,fragmentClass.getSimpleName());
         }
 
-        replaceFragment(fragment,fragmentClass.getSimpleName());
+        drawer.closeDrawers();
+        setTitle(item.getTitle());
         item.setChecked(true);
 
-        setTitle(item.getTitle());
 
-        drawer.closeDrawers();
         return true;
     }
+
 }

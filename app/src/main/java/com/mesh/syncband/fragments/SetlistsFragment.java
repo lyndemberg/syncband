@@ -44,7 +44,7 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        getActivity().setTitle("Setlists");
         return inflater.inflate(R.layout.fragment_setlists, container, false);
     }
 
@@ -96,11 +96,6 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
                 getView().findViewById(R.id.setlistsMessage).setVisibility(View.INVISIBLE);
             }
         });
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
 
