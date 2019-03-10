@@ -43,7 +43,6 @@ public class SongDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.song_dialog_fragment, container, false);
 
-//        final TextView title = view.findViewById(R.id.song_dialog_title);
         final NumberPicker pickerBpm = view.findViewById(R.id.picker_bpm);
         final TextInputEditText inputNameSong = view.findViewById(R.id.input_name_song);
         final TextInputEditText inputNameArtist = view.findViewById(R.id.input_name_artist);
