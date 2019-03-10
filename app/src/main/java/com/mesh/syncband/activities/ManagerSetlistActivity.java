@@ -8,6 +8,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -37,9 +39,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
     private SetlistRepository setlistRepository;
     private SongRepository songRepository;
     private SongAdapter songAdapter;
-    private ListView listViewSongs;
+    private RecyclerView recyclerViewSongs;
     private Setlist setlist = null;
-    private List<Song> songsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +54,31 @@ public class ManagerSetlistActivity extends AppCompatActivity
         setlistRepository = new SetlistRepository(this);
         songRepository = new SongRepository(this);
 
-        songAdapter = new SongAdapter(this, songsList);
+        recyclerViewSongs = findViewById(R.id.list_songs);
 
-        listViewSongs = findViewById(R.id.list_songs);
-        listViewSongs.setAdapter(songAdapter);
+        songAdapter = new SongAdapter(this, new ArrayList<Song>(), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int itemPosition = recyclerViewSongs.getChildLayoutPosition(view);
+                Song item = songAdapter.getItem(itemPosition);
+                SongDialog songDialog = new SongDialog();
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("song",item);
+                songDialog.setArguments(bundle);
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                songDialog.show(transaction, SongDialog.class.getSimpleName());
+            }
+        });
+
+        recyclerViewSongs.setAdapter(songAdapter);
+        recyclerViewSongs.setHasFixedSize(true);
+        RecyclerView.LayoutManager layout = new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false);
+        recyclerViewSongs.setLayoutManager(layout);
 
         //load setlist
         currentSetlist = getIntent().getStringExtra("currentSetlist");
-        setlistRepository.findByName(currentSetlist).observe(this,new Observer<Setlist>(){
+        setlistRepository.findByName(currentSetlist).observe(this, new Observer<Setlist>(){
             @Override
             public void onChanged(@Nullable Setlist set) {
                 setlist = set;
@@ -71,20 +89,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
 
         final EditText inputNameSetlist = findViewById(R.id.input_name_setlist);
         inputNameSetlist.setText(currentSetlist);
-
-        listViewSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Song item = songAdapter.getItem(i);
-                SongDialog songDialog = new SongDialog();
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("song",item);
-                songDialog.setArguments(bundle);
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                songDialog.show(transaction, SongDialog.class.getSimpleName());
-            }
-        });
-
 
         FloatingActionButton floatButton = findViewById(R.id.button_add_song);
         floatButton.setOnClickListener(new View.OnClickListener() {
@@ -101,9 +105,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
         songRepository.findAllBySetlist(setlist.getId()).observe(this, new Observer<List<Song>>() {
             @Override
             public void onChanged(@Nullable List<Song> songs) {
-                songAdapter.clear();
-                songAdapter.addAll(songs);
-                songsList = songs;
+                songAdapter.setDataset(songs);
+                songAdapter.notifyDataSetChanged();
                 if (songs.isEmpty())
                     findViewById(R.id.songs_message).setVisibility(View.VISIBLE);
                 else
