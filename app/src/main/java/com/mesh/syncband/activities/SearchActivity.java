@@ -26,7 +26,9 @@ import java.util.List;
 
 public class SearchActivity extends AppCompatActivity {
 
-    public static final int RESULT_SEARCH = 1;
+    public static final int SEARCH_REQUEST = 1;
+    public static final int SONG_SELECTED = 2;
+
     public static final String SONG_SELECTED_TO_ADD = "song_selected";
 
     private static final String TAG = ".activities.SearchActivity";
@@ -85,7 +87,7 @@ public class SearchActivity extends AppCompatActivity {
                 SongResult item = adapter.getItem(itemPosition);
                 Intent resultSearch = new Intent();
                 resultSearch.putExtra(SONG_SELECTED_TO_ADD,item);
-                setResult(RESULT_SEARCH, resultSearch);
+                setResult(SONG_SELECTED, resultSearch);
                 finish();
             }
         });
@@ -125,5 +127,4 @@ public class SearchActivity extends AppCompatActivity {
             }
         }
     }
-
 }

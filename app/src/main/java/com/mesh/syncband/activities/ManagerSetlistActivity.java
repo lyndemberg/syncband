@@ -126,7 +126,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
             songDialog.show(transaction, SongDialog.class.getSimpleName());
         }else if(option.equals(SongAddOptionsDialog.SongOption.SPOTIFY)){
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivityForResult(intent,SearchActivity.RESULT_SEARCH);
+            startActivityForResult(intent,SearchActivity.SEARCH_REQUEST);
         }
     }
 
@@ -144,7 +144,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SearchActivity.RESULT_SEARCH){
+        if(requestCode == SearchActivity.SEARCH_REQUEST && resultCode == SearchActivity.SONG_SELECTED){
             SongResult songResult = (SongResult) data.getSerializableExtra(SearchActivity.SONG_SELECTED_TO_ADD);
             Song toSave = new Song();
             toSave.setName(songResult.getName());
