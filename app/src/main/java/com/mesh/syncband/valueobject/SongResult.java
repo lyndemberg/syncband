@@ -2,7 +2,7 @@ package com.mesh.syncband.valueobject;
 
 import java.io.Serializable;
 
-public class SongVo implements Serializable {
+public class SongResult implements Serializable {
     private String name;
     private String artist;
     private Double bpm;
@@ -10,7 +10,7 @@ public class SongVo implements Serializable {
     private String photo;
 
 
-    public SongVo(String name, String artist, Double bpm, String album, String photo) {
+    public SongResult(String name, String artist, Double bpm, String album, String photo) {
         this.name = name;
         this.artist = artist;
         this.bpm = bpm;
@@ -58,7 +58,7 @@ public class SongVo implements Serializable {
         this.photo = photo;
     }
 
-    public SongVo() {
+    public SongResult() {
 
     }
 }

@@ -2,28 +2,32 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
+    <ImageView
+        android:id="@+id/photo_result"
+        android:layout_centerVertical="true"
+        android:layout_width="@dimen/photo_result_dim"
+        android:layout_height="@dimen/photo_result_dim" />
     <LinearLayout
+        android:layout_toRightOf="@+id/photo_result"
+        android:layout_centerVertical="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-
-    <TextView
-        android:id="@+id/label_song_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
-        android:text="Nome da musica"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/label_artist_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/label_song_name"
-        android:text="Nome do artista" />
-
+        <TextView
+            android:textAlignment="center"
+            android:id="@+id/label_song_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="Nome da musica"
+            android:textStyle="bold" />
+        <TextView
+            android:textAlignment="center"
+            android:id="@+id/label_artist_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/label_song_name"
+            android:text="Nome do artista" />
     </LinearLayout>
 
     <LinearLayout
@@ -34,7 +38,7 @@
         android:layout_alignParentRight="true">
         <TextView
             android:layout_gravity="center"
-            android:id="@+id/label_bpm_value"
+            android:id="@+id/label_bpm_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold" />

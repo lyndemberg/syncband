@@ -25,6 +25,7 @@ import com.mesh.syncband.fragments.dialog.SongAddOptionsDialog;
 import com.mesh.syncband.fragments.dialog.SongDialog;
 import com.mesh.syncband.model.Setlist;
 import com.mesh.syncband.model.Song;
+import com.mesh.syncband.valueobject.SongResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +126,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
             songDialog.show(transaction, SongDialog.class.getSimpleName());
         }else if(option.equals(SongAddOptionsDialog.SongOption.SPOTIFY)){
             Intent intent = new Intent(this, SearchActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent,SearchActivity.RESULT_SEARCH);
         }
     }
 
@@ -138,5 +139,19 @@ public class ManagerSetlistActivity extends AppCompatActivity
     @Override
     public void toUpdate(Song song) {
         songRepository.updateSong(song);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == SearchActivity.RESULT_SEARCH){
+            SongResult songResult = (SongResult) data.getSerializableExtra(SearchActivity.SONG_SELECTED_TO_ADD);
+            Song toSave = new Song();
+            toSave.setName(songResult.getName());
+            toSave.setArtist(songResult.getArtist());
+            Long bpm = Math.round(songResult.getBpm());
+            toSave.setBpm(bpm.intValue());
+            toSave(toSave);
+        }
     }
 }
