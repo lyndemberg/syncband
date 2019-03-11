@@ -96,7 +96,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 checkedItems.add(holder.getAdapterPosition());
-                Toast.makeText(context,"Status is: " + isChecked, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -120,5 +119,9 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
 
     public boolean isShowCheckBoxes() {
         return showCheckBoxes;
+    }
+
+    public List<Integer> getPositionsChecked(){
+        return checkedItems;
     }
 }

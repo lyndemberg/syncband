@@ -109,7 +109,13 @@ public class ManagerSetlistActivity extends AppCompatActivity
         buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                List<Integer> positionsChecked = songAdapter.getPositionsChecked();
+                for(Integer position:positionsChecked){
+                    Song item = songAdapter.getItem(position);
+                    songRepository.deleteSong(item); //this is async
+                    songAdapter.notifyItemRemoved(position);
+                    songAdapter.setShowCheckBox(false);
+                }
             }
         });
 
@@ -141,20 +147,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
         inflater.inflate(R.menu.manager_setlist_menu, menu);
         return true;
     }
-
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        MenuItem itemDelete = menu.findItem(R.id.action_cancel_delete);
-//        MenuItem itemCancel = menu.findItem(R.id.action_cancel_delete);
-//        if(itemDelete.isChecked()){
-//            itemDelete.setVisible(false);
-//            itemCancel.setVisible(true);
-//        }else {
-//            itemCancel.setVisible(false);
-//            itemDelete.setVisible(true);
-//        }
-//        return true;
-//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

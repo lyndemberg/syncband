@@ -110,7 +110,6 @@
         <android.support.design.widget.FloatingActionButton
             android:visibility="gone"
             android:id="@+id/button_delete_song"
-            android:backgroundTint="@color/red"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
