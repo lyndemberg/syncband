@@ -45,6 +45,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
     private Setlist setlist = null;
     private FloatingActionButton buttonAdd;
     private FloatingActionButton buttonDelete;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +116,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
                     songRepository.deleteSong(item); //this is async
                     songAdapter.notifyItemRemoved(position);
                     songAdapter.setShowCheckBox(false);
+                    hideItensToRemove();
                 }
             }
         });
@@ -145,6 +147,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.manager_setlist_menu, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -152,20 +155,31 @@ public class ManagerSetlistActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_delete){
             if(songAdapter.isShowCheckBoxes()){
-                songAdapter.setShowCheckBox(false);
-                songAdapter.clearCheckedItems();
-                buttonDelete.setVisibility(View.GONE);
-                buttonAdd.setVisibility(View.VISIBLE);
-                item.setTitle("Excluir");
+                hideItensToRemove();
             }else{
-                songAdapter.setShowCheckBox(true);
-                buttonAdd.setVisibility(View.GONE);
-                buttonDelete.setVisibility(View.VISIBLE);
-                item.setTitle("Cancelar");
+                showItensToRemove();
             }
         }
         songAdapter.notifyDataSetChanged();
         return true;
+    }
+
+    private void showItensToRemove(){
+        MenuItem item = menu.findItem(R.id.action_delete);
+        item.setTitle("Cancelar");
+        songAdapter.setShowCheckBox(true);
+        songAdapter.clearCheckedItems();
+        buttonAdd.setVisibility(View.GONE);
+        buttonDelete.setVisibility(View.VISIBLE);
+    }
+
+    private void hideItensToRemove(){
+        MenuItem item = menu.findItem(R.id.action_delete);
+        item.setTitle("Excluir");
+        songAdapter.setShowCheckBox(false);
+        songAdapter.clearCheckedItems();
+        buttonDelete.setVisibility(View.GONE);
+        buttonAdd.setVisibility(View.VISIBLE);
     }
 
     @Override
