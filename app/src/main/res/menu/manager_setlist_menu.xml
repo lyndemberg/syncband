@@ -4,4 +4,8 @@
         android:id="@+id/action_delete"
         android:title="Excluir">
     </item>
+    <!--<item-->
+        <!--android:id="@+id/action_cancel_delete"-->
+        <!--android:title="Cancelar">-->
+    <!--</item>-->
 </menu>

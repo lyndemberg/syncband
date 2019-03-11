@@ -10,10 +10,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.model.Song;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
@@ -36,12 +41,16 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
 
     private Context context;
     private List<Song> songs;
+    private List<Integer> checkedItems;
     private View.OnClickListener onClickListener;
-    private boolean showCheckBox = false;
+    private boolean showCheckBoxes;
+
 
     public SongAdapter(Context context, List<Song> data) {
         this.songs = data;
         this.context = context;
+        this.showCheckBoxes = false;
+        this.checkedItems = new ArrayList<>();
     }
 
     public void setOnClickListener(View.OnClickListener clickListener){
@@ -49,7 +58,11 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     }
 
     public void setShowCheckBox(boolean show){
-        this.showCheckBox = show;
+        this.showCheckBoxes = show;
+    }
+
+    public void clearCheckedItems(){
+        this.checkedItems = new ArrayList<>();
     }
 
     @NonNull
@@ -63,12 +76,29 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SongHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final SongHolder holder, int position) {
         Song song = songs.get(position);
-        if(showCheckBox)
+
+        if(showCheckBoxes){
             holder.checkBox.setVisibility(View.VISIBLE);
-        else
+        }else{
             holder.checkBox.setVisibility(View.GONE);
+            checkedItems = new ArrayList<>();
+        }
+
+        if(checkedItems.contains(position)){
+            holder.checkBox.setChecked(true);
+        }else{
+            holder.checkBox.setChecked(false);
+        }
+
+        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                checkedItems.add(holder.getAdapterPosition());
+                Toast.makeText(context,"Status is: " + isChecked, Toast.LENGTH_LONG).show();
+            }
+        });
 
         holder.labelSong.setText(song.getName());
         holder.labelArtist.setText(song.getArtist());
@@ -88,5 +118,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
         return songs.get(position);
     }
 
-
+    public boolean isShowCheckBoxes() {
+        return showCheckBoxes;
+    }
 }

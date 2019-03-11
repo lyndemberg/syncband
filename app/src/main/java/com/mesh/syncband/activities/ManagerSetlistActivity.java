@@ -43,6 +43,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
     private SongAdapter songAdapter;
     private RecyclerView recyclerViewSongs;
     private Setlist setlist = null;
+    private FloatingActionButton buttonAdd;
+    private FloatingActionButton buttonDelete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,8 +95,8 @@ public class ManagerSetlistActivity extends AppCompatActivity
         final EditText inputNameSetlist = findViewById(R.id.input_name_setlist);
         inputNameSetlist.setText(currentSetlist);
 
-        FloatingActionButton floatButton = findViewById(R.id.button_add_song);
-        floatButton.setOnClickListener(new View.OnClickListener() {
+        buttonAdd = findViewById(R.id.button_add_song);
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -102,6 +104,15 @@ public class ManagerSetlistActivity extends AppCompatActivity
             songOptions.show(transaction, SongAddOptionsDialog.class.getSimpleName());
             }
         });
+
+        buttonDelete = findViewById(R.id.button_delete_song);
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
     }
 
     private void refreshSongs(){
@@ -131,12 +142,37 @@ public class ManagerSetlistActivity extends AppCompatActivity
         return true;
     }
 
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//        MenuItem itemDelete = menu.findItem(R.id.action_cancel_delete);
+//        MenuItem itemCancel = menu.findItem(R.id.action_cancel_delete);
+//        if(itemDelete.isChecked()){
+//            itemDelete.setVisible(false);
+//            itemCancel.setVisible(true);
+//        }else {
+//            itemCancel.setVisible(false);
+//            itemDelete.setVisible(true);
+//        }
+//        return true;
+//    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId()==R.id.action_delete){
-            songAdapter.setShowCheckBox(true);
-            songAdapter.notifyDataSetChanged();
+        if(item.getItemId() == R.id.action_delete){
+            if(songAdapter.isShowCheckBoxes()){
+                songAdapter.setShowCheckBox(false);
+                songAdapter.clearCheckedItems();
+                buttonDelete.setVisibility(View.GONE);
+                buttonAdd.setVisibility(View.VISIBLE);
+                item.setTitle("Excluir");
+            }else{
+                songAdapter.setShowCheckBox(true);
+                buttonAdd.setVisibility(View.GONE);
+                buttonDelete.setVisibility(View.VISIBLE);
+                item.setTitle("Cancelar");
+            }
         }
+        songAdapter.notifyDataSetChanged();
         return true;
     }
 
