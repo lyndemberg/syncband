@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.mesh.syncband.R;
@@ -51,6 +52,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
     private FloatingActionButton buttonAdd;
     private FloatingActionButton buttonDelete;
     private Menu menu;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
         songRepository = new SongRepository(this);
 
         recyclerViewSongs = findViewById(R.id.list_songs);
+        progressBar = findViewById(R.id.progress_bar);
 
         songAdapter = new SongAdapter(this, new ArrayList<Song>());
         songAdapter.setOnClickListener(new View.OnClickListener() {
@@ -101,32 +104,31 @@ public class ManagerSetlistActivity extends AppCompatActivity
         final EditText inputNameSetlist = findViewById(R.id.input_name_setlist);
         inputNameSetlist.setText(currentSetlist);
 
-        //@TODO update setlist name
-//        inputNameSetlist.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//                setlist.setName(inputNameSetlist.getText().toString());
-//                setlistRepository.updateSetlist(setlist);
-//            }
-//        });
+        inputNameSetlist.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                currentSetlist = inputNameSetlist.getText().toString();
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        });
 
         buttonAdd = findViewById(R.id.button_add_song);
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            SongAddOptionsDialog songOptions = new SongAddOptionsDialog();
-            songOptions.show(transaction, SongAddOptionsDialog.class.getSimpleName());
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                SongAddOptionsDialog songOptions = new SongAddOptionsDialog();
+                songOptions.show(transaction, SongAddOptionsDialog.class.getSimpleName());
             }
         });
 
@@ -214,6 +216,13 @@ public class ManagerSetlistActivity extends AppCompatActivity
             Intent intent = new Intent(this, SearchActivity.class);
             startActivityForResult(intent,SearchActivity.SEARCH_REQUEST);
         }
+    }
+
+    @Override
+    protected void onStop() {
+        setlist.setName(currentSetlist);
+        setlistRepository.updateSetlist(setlist);
+        super.onStop();
     }
 
     @Override
