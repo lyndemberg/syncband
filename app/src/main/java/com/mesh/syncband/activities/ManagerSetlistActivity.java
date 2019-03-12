@@ -2,15 +2,20 @@ package com.mesh.syncband.activities;
 
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -96,6 +101,25 @@ public class ManagerSetlistActivity extends AppCompatActivity
         final EditText inputNameSetlist = findViewById(R.id.input_name_setlist);
         inputNameSetlist.setText(currentSetlist);
 
+        //@TODO update setlist name
+//        inputNameSetlist.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable editable) {
+//                setlist.setName(inputNameSetlist.getText().toString());
+//                setlistRepository.updateSetlist(setlist);
+//            }
+//        });
+
         buttonAdd = findViewById(R.id.button_add_song);
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,11 +161,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
         });
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        super.onBackPressed();
-        return true;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -159,8 +178,11 @@ public class ManagerSetlistActivity extends AppCompatActivity
             }else{
                 showItensToRemove();
             }
+            songAdapter.notifyDataSetChanged();
+        }else if(item.getItemId() == android.R.id.home){
+            finish();
         }
-        songAdapter.notifyDataSetChanged();
+
         return true;
     }
 

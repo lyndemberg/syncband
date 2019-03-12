@@ -21,7 +21,10 @@
         </activity>
         <activity
             android:name=".activities.ManagerSetlistActivity"
-            android:label="@string/title_activity_manager_setlist" />
+            android:label="@string/title_activity_manager_setlist"
+            android:parentActivityName=".activities.MainActivity">
+
+        </activity>
         <activity android:name=".activities.SearchActivity"></activity>
 
         <service

@@ -3,7 +3,6 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:windowSoftInputMode=""
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activities.ManagerSetlistActivity">
 
@@ -21,7 +20,6 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
-
         <LinearLayout
             android:focusable="true"
             android:focusableInTouchMode="true"
