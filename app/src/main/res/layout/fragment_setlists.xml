@@ -4,11 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".fragments.SetlistsFragment" android:layout_height="match_parent" android:layout_width="match_parent">
 
-
-    <ListView
-        android:id="@+id/setlistsView"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/setlists_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="match_parent" />
 
     <TextView
         android:textAlignment="center"
@@ -23,9 +22,9 @@
         android:layout_marginBottom="8dp"
         android:text="Nenhuma setlist criada!"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/setlistsView"
+        app:layout_constraintEnd_toEndOf="@+id/setlists_list"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/setlistsView" />
+        app:layout_constraintTop_toTopOf="@+id/setlists_list" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/buttonAddSetlist"

@@ -47,6 +47,16 @@ public class SetlistRepository {
         }.execute();
     }
 
+    public void deleteSetlistByName(final String setlistName){
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected Void doInBackground(Void... voids) {
+                setlistDao.deleteByName(setlistName);
+                return null;
+            }
+        }.execute();
+    }
+
     public LiveData<List<Setlist>> getAll(){
         return setlistDao.getAll();
     }
