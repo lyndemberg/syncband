@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.model.Song;
@@ -17,9 +18,9 @@ import com.mesh.syncband.model.Song;
 public class SongDialog extends DialogFragment {
 
     private Song song = null;
-    private NewSongListener listener;
+    private SongDialogListener listener;
 
-    public interface NewSongListener{
+    public interface SongDialogListener{
         void toSave(Song song);
         void toUpdate(Song song);
     }
@@ -34,7 +35,7 @@ public class SongDialog extends DialogFragment {
         if(getArguments() != null){
             song  = (Song) getArguments().get("song");
         }
-        listener = (NewSongListener) getActivity();
+        listener = (SongDialogListener) getActivity();
     }
 
     @Nullable
@@ -52,10 +53,12 @@ public class SongDialog extends DialogFragment {
         pickerBpm.setMaxValue(maxValue);
 
         if (song != null) {
+            getDialog().setTitle("Editar musica");
             inputNameSong.setText(song.getName());
             inputNameArtist.setText(song.getArtist());
             pickerBpm.setValue(song.getBpm());
         }else{
+            getDialog().setTitle("Nova musica");
             int defaultValue = getResources().getInteger(R.integer.default_bpm);
             pickerBpm.setValue(defaultValue);
         }
@@ -91,6 +94,5 @@ public class SongDialog extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        getDialog().getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
     }
 }

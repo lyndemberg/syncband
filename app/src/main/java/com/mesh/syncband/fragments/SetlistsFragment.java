@@ -8,65 +8,93 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.mesh.syncband.R;
 import com.mesh.syncband.activities.ManagerSetlistActivity;
+import com.mesh.syncband.adapters.SetlistAdapter;
 import com.mesh.syncband.database.AppDatabase;
 import com.mesh.syncband.database.SetlistRepository;
 import com.mesh.syncband.fragments.dialog.NewSetlistDialog;
 import com.mesh.syncband.model.Setlist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSetlistListener{
 
-    private ArrayAdapter<String> adapter;
-    private List<String> setlists = null;
     private SetlistRepository setlistRepository;
+    private MenuItem optionMenu;
+
+    private FloatingActionButton buttonDelete;
+    private FloatingActionButton buttonAdd;
+
+    private RecyclerView recyclerView;
+    private SetlistAdapter setlistAdapter;
 
     public SetlistsFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
         setlistRepository = new SetlistRepository(getContext());
-        adapter = new ArrayAdapter(getContext(),android.R.layout.simple_list_item_1);
+        setlistAdapter = new SetlistAdapter(getContext(), new ArrayList<String>(), new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int positionAdapter = recyclerView.getChildAdapterPosition(view);
+                String item = setlistAdapter.getItem(positionAdapter);
+                Intent intent = new Intent(getContext(), ManagerSetlistActivity.class);
+                intent.putExtra("currentSetlist",item);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_setlists, container, false);
-    }
+        getActivity().setTitle("Setlists");
+        View inflate = inflater.inflate(R.layout.fragment_setlists, container, false);
 
+        recyclerView = inflate.findViewById(R.id.setlists_list);
+        recyclerView.setAdapter(setlistAdapter);
+        RecyclerView.LayoutManager layout = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(layout);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        buttonDelete =  inflate.findViewById(R.id.button_delete_setlist);
+        buttonAdd = inflate.findViewById(R.id.buttonAddSetlist);
 
-        ListView listView = view.findViewById(R.id.setlistsView);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String selected = setlists.get(i);
-                Intent intent = new Intent(getContext(), ManagerSetlistActivity.class);
-                intent.putExtra("currentSetlist",selected);
-                startActivity(intent);
+            public void onClick(View view) {
+                List<Integer> positionsChecked = setlistAdapter.getPositionsChecked();
+                for(Integer position:positionsChecked){
+                    String item = setlistAdapter.getItem(position);
+                    setlistRepository.deleteSetlistByName(item);
+                    setlistAdapter.notifyItemRemoved(position);
+                    setlistAdapter.setShowCheckBox(false);
+                    hideItensToRemove();
+                }
             }
         });
-
-        FloatingActionButton floatButton = view.findViewById(R.id.buttonAddSetlist);
-        floatButton.setOnClickListener(new View.OnClickListener() {
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FragmentManager childFragmentManager = getChildFragmentManager();
@@ -75,6 +103,41 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
             }
         });
 
+        return inflate;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        optionMenu = menu.add("Excluir");
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == optionMenu.getItemId()){
+            if(setlistAdapter.isShowCheckBoxes()){
+                hideItensToRemove();
+            }else{
+                showItemsToRemove();
+            }
+            setlistAdapter.notifyDataSetChanged();
+        }
+        return true;
+    }
+
+    private void hideItensToRemove(){
+        buttonDelete.setVisibility(View.GONE);
+        buttonAdd.setVisibility(View.VISIBLE);
+        setlistAdapter.setShowCheckBox(false);
+        setlistAdapter.clearCheckedItems();
+        optionMenu.setTitle("Excluir");
+    }
+    private void showItemsToRemove(){
+        buttonAdd.setVisibility(View.INVISIBLE);
+        buttonDelete.setVisibility(View.VISIBLE);
+        setlistAdapter.setShowCheckBox(true);
+        setlistAdapter.clearCheckedItems();
+        optionMenu.setTitle("Cancelar");
     }
 
     @Override
@@ -87,20 +150,14 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
         setlistRepository.getAllNames().observe(this, new Observer<List<String>>() {
             @Override
             public void onChanged(@Nullable List<String> strings) {
-            adapter.clear();
-            setlists = strings;
-            adapter.addAll(setlists);
+            setlistAdapter.setDataset(strings);
+            setlistAdapter.notifyDataSetChanged();
             if (strings.isEmpty())
                 getView().findViewById(R.id.setlistsMessage).setVisibility(View.VISIBLE);
             else
                 getView().findViewById(R.id.setlistsMessage).setVisibility(View.INVISIBLE);
             }
         });
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
 

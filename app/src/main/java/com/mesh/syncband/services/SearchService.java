@@ -7,7 +7,7 @@ import android.os.ResultReceiver;
 import android.util.Log;
 
 import com.mesh.syncband.R;
-import com.mesh.syncband.valueobject.SongVo;
+import com.mesh.syncband.valueobject.SongResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,19 +75,22 @@ public class SearchService extends IntentService {
             String data = response.body().string();
             Log.d("AAA",data);
             JSONObject jsonObject = new JSONObject(data);
+            List<SongResult> listSongs = new ArrayList<>();
+            String next = null;
+            if(jsonObject.length() != 0){
+                next = jsonObject.getString("next");
+                JSONArray songs = jsonObject.getJSONArray("songs");
+                listSongs = new ArrayList<>();
+                for(int i=0; i<songs.length(); i++){
+                    JSONObject song = songs.getJSONObject(i);
+                    String name = song.getString("name");
+                    String artist = song.getString("artist");
+                    double bpm = song.getDouble("bpm");
+                    String album = song.getString("album");
+                    String photo = song.getString("photo");
 
-            String next = jsonObject.getString("next");
-            JSONArray songs = jsonObject.getJSONArray("songs");
-            List<SongVo> listSongs = new ArrayList<>();
-            for(int i=0; i<songs.length(); i++){
-                JSONObject song = songs.getJSONObject(i);
-                String name = song.getString("name");
-                String artist = song.getString("artist");
-                double bpm = song.getDouble("bpm");
-                String album = song.getString("album");
-                String photo = song.getString("photo");
-
-                listSongs.add(new SongVo(name,artist,bpm,album,photo));
+                    listSongs.add(new SongResult(name,artist,bpm,album,photo));
+                }
             }
 
             Bundle bundle = new Bundle();

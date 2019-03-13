@@ -3,11 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <android.support.v7.widget.AppCompatCheckBox
+        android:id="@+id/check_song"
+        android:visibility="gone"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <LinearLayout
+        android:layout_toRightOf="@id/check_song"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
 
     <TextView
         android:textSize="18sp"

@@ -29,6 +29,8 @@ public interface SetlistDao {
     void save(Setlist setlist);
     @Delete
     void delete(Setlist setlist);
+    @Query("DELETE FROM setlist WHERE name= :setlistName")
+    void deleteByName(String setlistName);
     @Update
     void update(Setlist updated);
 
