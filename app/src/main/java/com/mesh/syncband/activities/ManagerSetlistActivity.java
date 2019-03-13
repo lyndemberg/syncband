@@ -52,7 +52,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
     private FloatingActionButton buttonAdd;
     private FloatingActionButton buttonDelete;
     private Menu menu;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +66,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
         songRepository = new SongRepository(this);
 
         recyclerViewSongs = findViewById(R.id.list_songs);
-        progressBar = findViewById(R.id.progress_bar);
 
         songAdapter = new SongAdapter(this, new ArrayList<Song>());
         songAdapter.setOnClickListener(new View.OnClickListener() {
@@ -112,13 +110,11 @@ public class ManagerSetlistActivity extends AppCompatActivity
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 currentSetlist = inputNameSetlist.getText().toString();
-                progressBar.setVisibility(View.INVISIBLE);
             }
         });
 
