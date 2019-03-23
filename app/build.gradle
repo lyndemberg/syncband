@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.protobuf'
 
 android {
     compileSdkVersion 27
@@ -20,23 +19,6 @@ android {
     }
 }
 
-protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.6.1' }
-    plugins {
-        javalite { artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0" }
-        grpc { artifact = 'io.grpc:protoc-gen-grpc-java:1.19.0' // CURRENT_GRPC_VERSION
-        }
-    }
-    generateProtoTasks {
-        all().each { task ->
-            task.plugins {
-                javalite {}
-                grpc { // Options added to --grpc_out
-                    option 'lite' }
-            }
-        }
-    }
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -52,9 +34,6 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     implementation "android.arch.lifecycle:livedata:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
-    implementation 'io.grpc:grpc-okhttp:1.19.0' // CURRENT_GRPC_VERSION
-    implementation 'io.grpc:grpc-protobuf-lite:1.19.0' // CURRENT_GRPC_VERSION
-    implementation 'io.grpc:grpc-stub:1.19.0' // CURRENT_GRPC_VERSION
-    implementation 'javax.annotation:javax.annotation-api:1.2'
+    implementation 'com.github.stealthcopter:AndroidNetworkTools:0.4.3'
 }
 

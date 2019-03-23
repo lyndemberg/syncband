@@ -73,5 +73,8 @@ public class SetlistRepository {
         return setlistDao.findByName(name);
     }
 
+    public Setlist findByNameSync(String name){
+        return setlistDao.findByNameSync(name);
+    }
 
 }

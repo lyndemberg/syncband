@@ -48,4 +48,8 @@ public class ProfileRepository {
         return profileDao.getProfile();
     }
 
+    public Profile getProfileSync(){
+        return profileDao.getProfileSync();
+    }
+
 }
