@@ -1,0 +1,37 @@
+syntax="proto3";
+
+option java_multiple_files = true;
+package com.mesh.syncband.grpc.service;
+
+message Void {
+}
+message DeviceData {
+    string host = 1;
+    string nickname = 2;
+    string function = 3;
+}
+message Credentials {
+    string password = 1;
+    DeviceData device = 2;
+}
+message Confirmation{
+    bool status = 1;
+}
+
+message Timestamp {
+    int64 seconds = 1;
+    int32 nanos = 2;
+}
+message SongStart{
+    string name = 1;
+    string artist = 2;
+    string bpm = 3;
+    Timestamp start = 4;
+}
+
+service MetronomeService {
+    rpc ping(Void) returns (DeviceData);
+    rpc connect(Credentials) returns (Confirmation);
+    rpc initStream(Void) returns (stream SongStart);
+}
+

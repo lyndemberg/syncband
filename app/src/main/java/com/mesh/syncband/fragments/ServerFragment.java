@@ -7,31 +7,33 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.mesh.syncband.MetronomeServiceImpl;
+import com.mesh.syncband.PropertiesUtil;
 import com.mesh.syncband.R;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
+import com.mesh.syncband.grpc.service.DeviceData;
 import com.mesh.syncband.model.Profile;
 import com.mesh.syncband.model.Setlist;
-import com.mesh.syncband.socket.MetronomeServerSingleton;
-import com.mesh.syncband.socket.NotPossibleBindServer;
-import com.mesh.syncband.socket.NotSetPasswordException;
-import com.mesh.syncband.socket.valueobject.DeviceData;
 import com.stealthcopter.networktools.IPTools;
 
 import java.io.IOException;
 import java.util.List;
 
+import io.grpc.Server;
+import io.grpc.netty.NettyServerBuilder;
+
 
 public class ServerFragment extends Fragment {
 
-    private MetronomeServerSingleton server;
     private SetlistRepository setlistRepository;
     private ProfileRepository profileRepository;
     private TextInputEditText inputPassword;
@@ -70,16 +72,16 @@ public class ServerFragment extends Fragment {
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new ServerStopTask().execute();
             }
         });
 
         buttonIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String selectedString = spinnerSetlists.getSelectedItem().toString();
-                ServerStartTask serverAsync = new ServerStartTask();
-                serverAsync.execute(selectedString);
+                String setlistSelected = spinnerSetlists.getSelectedItem().toString();
+                String password = inputPassword.getText().toString();
+                ServerTask serverTask = new ServerTask();
+                serverTask.execute(setlistSelected, password);
             }
         });
         return view;
@@ -103,35 +105,39 @@ public class ServerFragment extends Fragment {
         setlistRepository.getAllNames().removeObserver(observerListSetlists);
     }
 
-    private class ServerStartTask extends AsyncTask<String,Boolean,Void>{
+    public class ServerTask extends AsyncTask<String,Boolean,Void> {
+
+        private Server server;
 
         @Override
         protected Void doInBackground(String... strings) {
-            server = MetronomeServerSingleton.getInstance();
 
-            Setlist setlist = setlistRepository.findByNameSync(strings[0]);
             Profile profile = profileRepository.getProfileSync();
-            DeviceData deviceData = new DeviceData();
-            deviceData.host = IPTools.getLocalIPv4Address().getHostAddress();
-            deviceData.nameProfile = profile.getNickName();
-            deviceData.function = profile.getFunction();
+            Setlist setlist = setlistRepository.findByNameSync(strings[0]);
+            DeviceData deviceData = DeviceData.newBuilder().setHost(IPTools.getLocalIPv4Address().getHostAddress())
+                    .setNickname("")
+                    .setFunction("")
+                    .build();
 
-            server.setSetlist(setlist);
-            server.setDeviceData(deviceData);
+            String password = strings[1];
 
-            try{
-                server.setPassword(inputPassword.getText().toString());
+            metronomeService.setData(deviceData,setlist,password);
+            server = NettyServerBuilder.forPort(PropertiesUtil.PORT_SERVER_GRPC)
+                    .addService(metronomeService)
+                    .build();
+
+            try {
                 server.start();
-                Log.d("SERVER","INICIOU");
                 publishProgress(true);
-                server.initializeHandler();
-            }catch(NotPossibleBindServer e){
-                publishProgress(false);
+                server.awaitTermination();
+            } catch (IOException e) {
                 cancel(true);
-            }catch(NotSetPasswordException e){
-                publishProgress(false);
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 cancel(true);
+                e.printStackTrace();
             }
+
             return null;
         }
 
@@ -139,34 +145,37 @@ public class ServerFragment extends Fragment {
         @Override
         protected void onProgressUpdate(Boolean... values) {
             if(values[0]){
-                //started success
                 buttonIniciar.setVisibility(View.INVISIBLE);
                 buttonStop.setVisibility(View.VISIBLE);
+                spinnerSetlists.setEnabled(false);
+                inputPassword.setEnabled(false);
+            }else{
+                buttonIniciar.setEnabled(true);
+                spinnerSetlists.setEnabled(true);
+                inputPassword.setEnabled(true);
             }
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+            buttonStop.setVisibility(View.INVISIBLE);
+            buttonIniciar.setVisibility(View.VISIBLE);
+            buttonIniciar.setEnabled(true);
+            spinnerSetlists.setEnabled(true);
+            inputPassword.setEnabled(true);
+            Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
         }
 
         @Override
         protected void onCancelled() {
-            super.onCancelled();
+            buttonStop.setVisibility(View.INVISIBLE);
+            buttonIniciar.setVisibility(View.VISIBLE);
+            buttonIniciar.setEnabled(true);
+            spinnerSetlists.setEnabled(true);
+            inputPassword.setEnabled(true);
+            Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
         }
     }
 
-    private class ServerStopTask extends AsyncTask<Void,Void,Void>{
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            try {
-                server.stop();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
 
 }

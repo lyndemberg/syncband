@@ -13,32 +13,31 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mesh.syncband.MetronomeServiceImpl;
 import com.mesh.syncband.R;
-import com.mesh.syncband.socket.valueobject.DeviceData;
+import com.mesh.syncband.grpc.service.DeviceData;
+import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
+import com.mesh.syncband.grpc.service.Void;
 import com.stealthcopter.networktools.SubnetDevices;
 import com.stealthcopter.networktools.subnet.Device;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
 public class HomeFragment extends Fragment {
 
     private TextView status;
     private TextView currentBpm;
     private TextView currentSong;
+    private TextView messageDisconnect;
     private Button buttonDisconnect;
     private LinearLayout layoutVolume;
     private Button buttonSearch;
-    private List<DeviceData> serversFound;
 
     public HomeFragment() {
     }
@@ -46,7 +45,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        serversFound = new ArrayList<>();
     }
 
 
@@ -69,10 +67,19 @@ public class HomeFragment extends Fragment {
         currentSong = view.findViewById(R.id.current_song);
         buttonDisconnect = view.findViewById(R.id.button_disconnect);
         layoutVolume = view.findViewById(R.id.layout_volume);
+        messageDisconnect = view.findViewById(R.id.message_disconnect);
 
         return view;
     }
 
+    private void showInServer(){
+        messageDisconnect.setVisibility(View.INVISIBLE);
+        buttonSearch.setVisibility(View.INVISIBLE);
+        status.setVisibility(View.VISIBLE);
+        currentBpm.setVisibility(View.VISIBLE);
+        currentSong.setVisibility(View.VISIBLE);
+        layoutVolume.setVisibility(View.VISIBLE);
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -85,74 +92,48 @@ public class HomeFragment extends Fragment {
         super.onStart();
     }
 
-    private void showItensDisconnect(){
-
-    }
-
-    private void showItensConnect(){
-
-    }
-
-    private class SearchServersTask extends AsyncTask<Void,Void,List<DeviceData>>{
+    private class SearchServersTask extends AsyncTask<Void,DeviceData,Void>{
         private static final int PORT = 44444;
-        private ExecutorService executorService;
-        private volatile int count = 0;
         @Override
-        protected List<DeviceData> doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
 
-            final List<DeviceData> deviceDataList = new ArrayList<>();
             SubnetDevices.fromLocalAddress().findDevices(new SubnetDevices.OnSubnetDeviceFound() {
                 @Override
                 public void onDeviceFound(final Device device) {
+                    ManagedChannel channel = ManagedChannelBuilder.forAddress(device.ip, PORT).usePlaintext().build();
+                    MetronomeServiceGrpc.MetronomeServiceStub stub = MetronomeServiceGrpc.newStub(channel);
+                    stub.ping(Void.newBuilder().build(), new StreamObserver<DeviceData>() {
+                        private DeviceData deviceData;
+                        @Override
+                        public void onNext(DeviceData value) {
+                            this.deviceData = value;
+                            publishProgress(value);
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            Log.d("HOME","Not server"+ device.ip);
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                        }
+                    });
+
                 }
                 @Override
                 public void onFinished(ArrayList<Device> devicesFound) {
-//                    executorService = Executors.newFixedThreadPool(2);
-                    for(final Device device : devicesFound){
-                        Runnable ping = new Runnable(){
-                            @Override
-                            public void run() {
-                                try {
-                                    Socket socket = new Socket(device.ip, PORT);
-                                    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                                    JSONObject request = new JSONObject();
-                                    request.put("action","PING");
-                                    out.writeObject(request);
-                                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                                    DeviceData deviceData = (DeviceData) in.readObject();
-                                    deviceDataList.add(deviceData);
-                                    socket.close();
-                                    count++;
-                                } catch (IOException e) {
-                                    count++;
-                                    e.printStackTrace();
-                                } catch (JSONException e) {
-                                    count++;
-                                    e.printStackTrace();
-                                } catch (ClassNotFoundException e) {
-                                    count++;
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        ping.run();
-//                        executorService.execute(ping);
-                    }
-
-//                    while(count != devicesFound.size()){
-//
-//                    }
                 }
-
             });
 
 
-            return deviceDataList;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(List<DeviceData> deviceData) {
-            Log.d("HOME","ENCONTRADOS->"+deviceData.toString());
+        protected void onProgressUpdate(DeviceData... values) {
+            String s = values[0].getHost() + "-" +  values[0].getNickname() + "-"+ values[0].getFunction();
+            Log.d("HOME","ENCONTRADO->>" +s);
         }
 
     }
