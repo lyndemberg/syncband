@@ -41,6 +41,7 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
 
     @Inject
     SetlistRepository setlistRepository;
+
     private MenuItem optionMenu;
 
     private FloatingActionButton buttonDelete;

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.fragments.dialog.ListServersDialog;
 import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.grpc.service.DeviceData;
 import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
@@ -70,7 +72,10 @@ public class HomeFragment extends Fragment {
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new SearchServersTask().execute();
+                FragmentManager childFragmentManager = getChildFragmentManager();
+                ListServersDialog listServersDialog = new ListServersDialog();
+                listServersDialog.show(childFragmentManager,ListServersDialog.class.getSimpleName());
+//                new SearchServersTask().execute();
             }
         });
 
@@ -107,50 +112,5 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private class SearchServersTask extends AsyncTask<Void,DeviceData,Void>{
-        private static final int PORT = 44444;
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            SubnetDevices.fromLocalAddress().findDevices(new SubnetDevices.OnSubnetDeviceFound() {
-                @Override
-                public void onDeviceFound(final Device device) {
-                    ManagedChannel channel = ManagedChannelBuilder.forAddress(device.ip, PORT).usePlaintext().build();
-                    MetronomeServiceGrpc.MetronomeServiceStub stub = MetronomeServiceGrpc.newStub(channel);
-                    stub.ping(Void.newBuilder().build(), new StreamObserver<DeviceData>() {
-                        private DeviceData deviceData;
-                        @Override
-                        public void onNext(DeviceData value) {
-                            this.deviceData = value;
-                            publishProgress(value);
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            Log.d("HOME","Not server"+ device.ip);
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                        }
-                    });
-
-                }
-                @Override
-                public void onFinished(ArrayList<Device> devicesFound) {
-                }
-            });
-
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(DeviceData... values) {
-            String s = values[0].getHost() + "-" +  values[0].getNickname() + "-"+ values[0].getFunction();
-            Log.d("HOME","ENCONTRADO->>" +s);
-        }
-
-    }
 
 }
