@@ -45,6 +45,7 @@ public class MetronomeServer {
 
     public void stop() {
         if (server != null) {
+            //notify clients by streams with song play null
             server.shutdown();
             status = false;
         }

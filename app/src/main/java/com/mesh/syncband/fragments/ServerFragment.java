@@ -82,6 +82,7 @@ public class ServerFragment extends Fragment {
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                metronomeServer.stop();
             }
         });
 
@@ -107,12 +108,32 @@ public class ServerFragment extends Fragment {
     public void onStart() {
         super.onStart();
         setlistRepository.getAllNames().observe(this, observerListSetlists);
+        if(metronomeServer.isRunning()){
+            updateViewInRunning();
+        }else{
+            updateViewWhenNotRunning();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         setlistRepository.getAllNames().removeObserver(observerListSetlists);
+    }
+
+    private void updateViewInRunning(){
+        buttonIniciar.setVisibility(View.INVISIBLE);
+        buttonStop.setVisibility(View.VISIBLE);
+        spinnerSetlists.setEnabled(false);
+        inputPassword.setEnabled(false);
+    }
+
+
+    private void updateViewWhenNotRunning(){
+        buttonIniciar.setVisibility(View.VISIBLE);
+        buttonStop.setVisibility(View.INVISIBLE);
+        spinnerSetlists.setEnabled(true);
+        inputPassword.setEnabled(true);
     }
 
     public class ServerTask extends AsyncTask<String,Boolean,Void> {
@@ -146,34 +167,19 @@ public class ServerFragment extends Fragment {
         @Override
         protected void onProgressUpdate(Boolean... values) {
             if(values[0]){
-                buttonIniciar.setVisibility(View.INVISIBLE);
-                buttonStop.setVisibility(View.VISIBLE);
-                spinnerSetlists.setEnabled(false);
-                inputPassword.setEnabled(false);
-            }else{
-                buttonIniciar.setEnabled(true);
-                spinnerSetlists.setEnabled(true);
-                inputPassword.setEnabled(true);
+                updateViewInRunning();
             }
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            buttonStop.setVisibility(View.INVISIBLE);
-            buttonIniciar.setVisibility(View.VISIBLE);
-            buttonIniciar.setEnabled(true);
-            spinnerSetlists.setEnabled(true);
-            inputPassword.setEnabled(true);
+            updateViewWhenNotRunning();
             Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
         }
 
         @Override
         protected void onCancelled() {
-            buttonStop.setVisibility(View.INVISIBLE);
-            buttonIniciar.setVisibility(View.VISIBLE);
-            buttonIniciar.setEnabled(true);
-            spinnerSetlists.setEnabled(true);
-            inputPassword.setEnabled(true);
+            updateViewWhenNotRunning();
             Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
         }
     }
