@@ -6,12 +6,17 @@ import android.os.AsyncTask;
 
 import com.mesh.syncband.model.Profile;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class ProfileRepository {
 
     private final ProfileDao profileDao;
 
-    public ProfileRepository(Context ctx) {
-        profileDao = AppDatabase.getAppDatabase(ctx).getProfileDao();
+    @Inject
+    public ProfileRepository(ProfileDao profileDao) {
+        this.profileDao = profileDao;
     }
 
     public void insertProfile(final Profile profile){
@@ -46,6 +51,10 @@ public class ProfileRepository {
 
     public LiveData<Profile> getProfile(){
         return profileDao.getProfile();
+    }
+
+    public Profile getProfileSync(){
+        return profileDao.getProfileSync();
     }
 
 }

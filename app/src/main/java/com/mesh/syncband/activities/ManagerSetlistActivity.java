@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.adapters.SongAdapter;
 import com.mesh.syncband.database.SetlistRepository;
@@ -40,12 +41,17 @@ import com.mesh.syncband.valueobject.SongResult;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class ManagerSetlistActivity extends AppCompatActivity
         implements SongAddOptionsDialog.SongOptionsListener, SongDialog.SongDialogListener {
 
+    @Inject
+    SetlistRepository setlistRepository;
+    @Inject
+    SongRepository songRepository;
+
     String currentSetlist = "";
-    private SetlistRepository setlistRepository;
-    private SongRepository songRepository;
     private SongAdapter songAdapter;
     private RecyclerView recyclerViewSongs;
     private Setlist setlist = null;
@@ -55,6 +61,7 @@ public class ManagerSetlistActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ((MainApplication)getApplication()).getComponent().inject(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager_setlist);
 
@@ -62,8 +69,6 @@ public class ManagerSetlistActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setlistRepository = new SetlistRepository(this);
-        songRepository = new SongRepository(this);
 
         recyclerViewSongs = findViewById(R.id.list_songs);
 

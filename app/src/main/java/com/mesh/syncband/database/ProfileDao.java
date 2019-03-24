@@ -19,6 +19,8 @@ public interface ProfileDao {
     //access @Entity Profile
     @Query("SELECT * FROM profile")
     LiveData<Profile> getProfile();
+    @Query("SELECT * FROM profile")
+    Profile getProfileSync();
     @Insert
     void save(Profile profile);
     @Delete
