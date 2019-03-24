@@ -1,5 +1,6 @@
 package com.mesh.syncband.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,8 +14,9 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.mesh.syncband.MetronomeServiceImpl;
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.grpc.service.DeviceData;
 import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
 import com.mesh.syncband.grpc.service.Void;
@@ -22,14 +24,18 @@ import com.stealthcopter.networktools.SubnetDevices;
 import com.stealthcopter.networktools.subnet.Device;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 
 public class HomeFragment extends Fragment {
+
+
+    @Inject
+    MetronomeServer metronomeServer;
 
     private TextView status;
     private TextView currentBpm;
@@ -42,11 +48,17 @@ public class HomeFragment extends Fragment {
     public HomeFragment() {
     }
 
+
+    @Override
+    public void onAttach(Context context) {
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
+        super.onAttach(context);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,6 +102,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        if(metronomeServer.isRunning()){
+            showInServer();
+        }
     }
 
     private class SearchServersTask extends AsyncTask<Void,DeviceData,Void>{

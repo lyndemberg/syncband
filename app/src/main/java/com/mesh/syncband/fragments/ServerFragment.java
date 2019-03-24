@@ -1,6 +1,7 @@
 package com.mesh.syncband.fragments;
 
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
@@ -15,11 +16,11 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.mesh.syncband.MetronomeServiceImpl;
-import com.mesh.syncband.PropertiesUtil;
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
+import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.grpc.service.DeviceData;
 import com.mesh.syncband.model.Profile;
 import com.mesh.syncband.model.Setlist;
@@ -28,14 +29,18 @@ import com.stealthcopter.networktools.IPTools;
 import java.io.IOException;
 import java.util.List;
 
-import io.grpc.Server;
-import io.grpc.netty.NettyServerBuilder;
+import javax.inject.Inject;
 
 
 public class ServerFragment extends Fragment {
 
-    private SetlistRepository setlistRepository;
-    private ProfileRepository profileRepository;
+    @Inject
+    SetlistRepository setlistRepository;
+    @Inject
+    ProfileRepository profileRepository;
+    @Inject
+    MetronomeServer metronomeServer;
+
     private TextInputEditText inputPassword;
     private Spinner spinnerSetlists;
     private Button buttonIniciar;
@@ -54,11 +59,16 @@ public class ServerFragment extends Fragment {
     public ServerFragment() {
     }
 
+
+    @Override
+    public void onAttach(Context context) {
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
+        super.onAttach(context);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setlistRepository = new SetlistRepository(getContext());
-        profileRepository = new ProfileRepository(getContext());
     }
 
     @Override
@@ -107,29 +117,20 @@ public class ServerFragment extends Fragment {
 
     public class ServerTask extends AsyncTask<String,Boolean,Void> {
 
-        private Server server;
-
         @Override
         protected Void doInBackground(String... strings) {
-
             Profile profile = profileRepository.getProfileSync();
             Setlist setlist = setlistRepository.findByNameSync(strings[0]);
             DeviceData deviceData = DeviceData.newBuilder().setHost(IPTools.getLocalIPv4Address().getHostAddress())
-                    .setNickname("")
-                    .setFunction("")
+                    .setNickname(profile.getNickName())
+                    .setFunction(profile.getFunction())
                     .build();
-
             String password = strings[1];
 
-            metronomeService.setData(deviceData,setlist,password);
-            server = NettyServerBuilder.forPort(PropertiesUtil.PORT_SERVER_GRPC)
-                    .addService(metronomeService)
-                    .build();
-
             try {
-                server.start();
+                metronomeServer.start(deviceData,setlist,password);
                 publishProgress(true);
-                server.awaitTermination();
+                metronomeServer.blockUntilShutdown();
             } catch (IOException e) {
                 cancel(true);
                 e.printStackTrace();

@@ -62,39 +62,6 @@ public class SongAddOptionsDialog extends DialogFragment {
     }
 
 
-//    @NonNull
-//    @Override
-//    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        builder.setTitle("Como deseja adicionar a nova musica?");
-//
-//        builder.setPositiveButton("Manual", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//                SongOptionsListener listenerOptions = (SongOptionsListener) getActivity();
-//                listenerOptions.notifySongSelected(SongOption.MANUAL);
-//                dismiss();
-//            }
-//        });
-//
-//        builder.setNegativeButton("Spotify", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialogInterface, int i) {
-//                SongOptionsListener listenerOptions = (SongOptionsListener) getActivity();
-//                listenerOptions.notifySongSelected(SongOption.MANUAL);
-//                dismiss();
-//            }
-//        });
-//
-//        builder.
-//        //set icons
-//        builder.setPositiveButtonIcon(getResources().getDrawable(R.drawable.ic_add_cicle_outline_60dp));
-//        builder.setNegativeButtonIcon(getResources().getDrawable(R.drawable.ic_iconmonstr_spotify_1));
-//
-//        return builder.create();
-//    }
-
-
 
 
 }

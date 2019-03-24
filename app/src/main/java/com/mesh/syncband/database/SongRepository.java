@@ -9,12 +9,17 @@ import com.mesh.syncband.model.Song;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class SongRepository {
 
     private final SongDao songDao;
 
-    public SongRepository(Context ctx) {
-        songDao = AppDatabase.getAppDatabase(ctx).getSongDao();
+    @Inject
+    public SongRepository(SongDao songDao) {
+        this.songDao = songDao;
     }
 
     public void insertSong(final Song song){

@@ -1,4 +1,4 @@
-package com.mesh.syncband;
+package com.mesh.syncband.grpc;
 
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.grpc.service.Confirmation;

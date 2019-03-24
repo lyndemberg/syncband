@@ -2,7 +2,6 @@ package com.mesh.syncband.fragments;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,25 +12,37 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.model.Profile;
 
+import javax.inject.Inject;
+
 public class PerfilFragment extends Fragment {
+
+    @Inject
+    ProfileRepository profileRepository;
 
     private TextInputEditText inputNickname;
     private TextInputEditText inputFunction;
-    private ProfileRepository profileRepository;
     private Profile profile;
 
     public PerfilFragment() {
         // Required empty public constructor
     }
 
+
+    @Override
+    public void onAttach(Context context) {
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
+        super.onAttach(context);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        profileRepository = new ProfileRepository(getContext());
+
     }
 
     @Override
