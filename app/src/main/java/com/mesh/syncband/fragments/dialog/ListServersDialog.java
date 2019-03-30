@@ -1,6 +1,5 @@
 package com.mesh.syncband.fragments.dialog;
 
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,18 +13,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-
 import com.mesh.syncband.R;
 import com.mesh.syncband.adapters.ServerResultAdapter;
-import com.mesh.syncband.grpc.service.DeviceData;
-import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
-import com.mesh.syncband.grpc.service.Void;
+import com.mesh.syncband.grpc.DeviceData;
+import com.mesh.syncband.grpc.MetronomeServiceGrpc;
+import com.mesh.syncband.grpc.Void;
 import com.stealthcopter.networktools.SubnetDevices;
 import com.stealthcopter.networktools.subnet.Device;
-
 import java.util.ArrayList;
-
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -42,7 +37,6 @@ public class ListServersDialog extends DialogFragment {
         void notifyServerSelected(DeviceData deviceData);
     }
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -54,7 +48,9 @@ public class ListServersDialog extends DialogFragment {
             public void onClick(View view) {
                 int positionAdapter = recyclerView.getChildAdapterPosition(view);
                 DeviceData item = adapter.getItem(positionAdapter);
-                Toast.makeText(getContext(),"ESCOLHEU-->"+item.getNickname(),Toast.LENGTH_LONG).show();
+                ListServersListener listener = (ListServersListener) getParentFragment();
+                listener.notifyServerSelected(item);
+                dismiss();
             }
 
         });

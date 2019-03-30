@@ -1,6 +1,8 @@
 package com.mesh.syncband.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,32 +14,40 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.database.ProfileRepository;
+import com.mesh.syncband.fragments.dialog.AuthenticationDialog;
 import com.mesh.syncband.fragments.dialog.ListServersDialog;
+import com.mesh.syncband.grpc.Credentials;
+import com.mesh.syncband.grpc.DeviceData;
+import com.mesh.syncband.grpc.Flow;
+import com.mesh.syncband.grpc.MetronomeClient;
 import com.mesh.syncband.grpc.MetronomeServer;
-import com.mesh.syncband.grpc.service.DeviceData;
-import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
-import com.mesh.syncband.grpc.service.Void;
-import com.stealthcopter.networktools.SubnetDevices;
-import com.stealthcopter.networktools.subnet.Device;
+import com.mesh.syncband.grpc.SongStart;
+import com.mesh.syncband.model.Profile;
+import com.stealthcopter.networktools.IPTools;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.stub.StreamObserver;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements ListServersDialog.ListServersListener {
 
 
     @Inject
     MetronomeServer metronomeServer;
+    @Inject
+    MetronomeClient metronomeClient;
+    @Inject
+    ProfileRepository profileRepository;
 
     private TextView status;
     private TextView currentBpm;
@@ -46,6 +56,8 @@ public class HomeFragment extends Fragment {
     private Button buttonDisconnect;
     private LinearLayout layoutVolume;
     private Button buttonSearch;
+    private ImageButton previousButton;
+    private ImageButton nextButton;
 
     public HomeFragment() {
     }
@@ -69,13 +81,28 @@ public class HomeFragment extends Fragment {
 
         buttonSearch = view.findViewById(R.id.button_search);
 
+        previousButton = view.findViewById(R.id.button_previous);
+        nextButton = view.findViewById(R.id.button_next);
+
+        previousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FragmentManager childFragmentManager = getChildFragmentManager();
                 ListServersDialog listServersDialog = new ListServersDialog();
                 listServersDialog.show(childFragmentManager,ListServersDialog.class.getSimpleName());
-//                new SearchServersTask().execute();
             }
         });
 
@@ -89,13 +116,66 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    private void updateButtonsPreviousAndNext(){
+        int size = metronomeServer.getSongList().size();
+        int position = metronomeServer.getCurrentPosition();
+        if(position < size){
+            nextButton.setVisibility(View.VISIBLE);
+        }else{
+            nextButton.setVisibility(View.INVISIBLE);
+        }
+        if(size>position){
+            nextButton.setVisibility(View.VISIBLE);
+        }else{
+            nextButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
     private void showInServer(){
+        //invisible
         messageDisconnect.setVisibility(View.INVISIBLE);
         buttonSearch.setVisibility(View.INVISIBLE);
+        //visible
         status.setVisibility(View.VISIBLE);
         currentBpm.setVisibility(View.VISIBLE);
         currentSong.setVisibility(View.VISIBLE);
         layoutVolume.setVisibility(View.VISIBLE);
+        previousButton.setVisibility(View.VISIBLE);
+        nextButton.setVisibility(View.VISIBLE);
+        updateButtonsPreviousAndNext();
+    }
+
+    private void showInClient(){
+        //invisible
+        buttonSearch.setVisibility(View.INVISIBLE);
+        messageDisconnect.setVisibility(View.INVISIBLE);
+        previousButton.setVisibility(View.INVISIBLE);
+        nextButton.setVisibility(View.INVISIBLE);
+        //visible
+        status.setVisibility(View.VISIBLE);
+        buttonDisconnect.setVisibility(View.VISIBLE);
+        layoutVolume.setVisibility(View.VISIBLE);
+        currentSong.setVisibility(View.VISIBLE);
+        currentBpm.setVisibility(View.VISIBLE);
+    }
+
+    private void showInSearch(){
+        //invisible
+        status.setVisibility(View.INVISIBLE);
+        buttonDisconnect.setVisibility(View.INVISIBLE);
+        layoutVolume.setVisibility(View.INVISIBLE);
+        currentBpm.setVisibility(View.INVISIBLE);
+        currentSong.setVisibility(View.INVISIBLE);
+        previousButton.setVisibility(View.INVISIBLE);
+        nextButton.setVisibility(View.INVISIBLE);
+        //visible
+        messageDisconnect.setVisibility(View.VISIBLE);
+        buttonSearch.setVisibility(View.VISIBLE);
+    }
+
+    private void updateCurrentSongInView(SongStart songStart){
+        currentSong.setText(songStart.getName()+" - "+songStart.getArtist());
+        currentBpm.setText(songStart.getBpm()+"");
     }
 
     @Override
@@ -109,8 +189,110 @@ public class HomeFragment extends Fragment {
         super.onStart();
         if(metronomeServer.isRunning()){
             showInServer();
+        }else if(metronomeClient.isConnected()){
+            showInClient();
+        }else{
+            showInSearch();
         }
     }
 
 
+    @Override
+    public void notifyServerSelected(final DeviceData deviceData) {
+        final EditText inputPassword = new EditText(getContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Insira a senha");
+        builder.setMessage("Server: " + deviceData.getNickname());
+        builder.setView(inputPassword);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Conectar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                ClientTask connectTask = new ClientTask(deviceData);
+                connectTask.execute(inputPassword.getText().toString());
+            }
+        });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+
+        builder.create().show();
+    }
+
+    public class ClientTask extends AsyncTask<String, Flow, Void> {
+
+        private DeviceData serverData;
+
+        public ClientTask(DeviceData serverData){
+            this.serverData = serverData;
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String password = strings[0];
+
+            Profile profileSync = profileRepository.getProfileSync();
+            if(profileSync == null) {
+                cancel(true);
+            }else{
+
+                DeviceData clientData = DeviceData.newBuilder()
+                        .setHost(IPTools.getLocalIPv4Address().getHostAddress())
+                        .setNickname(profileSync.getNickName())
+                        .setFunction(profileSync.getFunction())
+                        .build();
+
+
+                Credentials credentials = Credentials.newBuilder().setDevice(clientData).setPassword(password).build();
+
+                Iterator<Flow> connect = metronomeClient.connect(serverData, credentials);
+                while(connect.hasNext()){
+                    Flow next = connect.next();
+                    publishProgress(next);
+                }
+
+            }
+
+            return null;
+        }
+
+
+        @Override
+        protected void onProgressUpdate(Flow... values) {
+            Flow flow  = values[0];
+            switch (flow.getTypeFlow()){
+                case AUTHORIZATION_SUCCESS:
+                    Toast.makeText(getContext(),"Você está conectado a " + serverData.getNickname(),Toast.LENGTH_LONG).show();
+                    status.setText("Conectado a " + serverData.getNickname());
+                    metronomeClient.setConnected(true);
+                    showInClient();
+                    break;
+                case AUTHORIZATION_FAIL:
+                    Toast.makeText(getContext(),"Senha incorreta!",Toast.LENGTH_LONG).show();
+                    showInSearch();
+                    break;
+                case DISCONNECT:
+                    Toast.makeText(getContext(), "Server desligado",Toast.LENGTH_LONG).show();
+                    showInSearch();
+                    break;
+                case SONG_START:
+                    SongStart start = flow.getSong();
+                    updateCurrentSongInView(start);
+                    break;
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            Toast.makeText(getContext(),"Defina o seu perfil primeiro!",Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+        }
+    }
 }

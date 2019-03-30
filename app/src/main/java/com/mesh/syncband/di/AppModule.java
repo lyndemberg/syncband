@@ -8,6 +8,7 @@ import com.mesh.syncband.database.AppDatabase;
 import com.mesh.syncband.database.ProfileDao;
 import com.mesh.syncband.database.SetlistDao;
 import com.mesh.syncband.database.SongDao;
+import com.mesh.syncband.grpc.MetronomeClient;
 import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.grpc.MetronomeServiceImpl;
 
@@ -60,8 +61,17 @@ public class AppModule {
 
     @Singleton
     @Provides
-    public MetronomeServer provideMetronomeServer(){
-        return new MetronomeServer();
+    public MetronomeServer provideMetronomeServer(Context context, ProfileDao profileDao){
+        return new MetronomeServer(context,profileDao);
     }
+
+    @Singleton
+    @Provides
+    public MetronomeClient provideMetronomeClient(Context context){
+        return new MetronomeClient(context);
+    }
+
+
+
 
 }

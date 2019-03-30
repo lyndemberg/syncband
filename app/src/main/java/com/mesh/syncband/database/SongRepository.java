@@ -55,5 +55,8 @@ public class SongRepository {
     public LiveData<List<Song>> findAllBySetlist(int idSetlist){
         return songDao.findAllBySetlist(idSetlist);
     }
+    public List<Song> findAllBySetlistSync(int idSetlist){
+        return songDao.findAllBySetlistSync(idSetlist);
+    }
 
 }

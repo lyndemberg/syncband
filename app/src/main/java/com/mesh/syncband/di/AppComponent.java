@@ -5,6 +5,7 @@ import com.mesh.syncband.fragments.HomeFragment;
 import com.mesh.syncband.fragments.PerfilFragment;
 import com.mesh.syncband.fragments.ServerFragment;
 import com.mesh.syncband.fragments.SetlistsFragment;
+import com.mesh.syncband.fragments.dialog.AuthenticationDialog;
 
 import javax.inject.Singleton;
 
@@ -19,5 +20,6 @@ public interface AppComponent {
     void inject(ManagerSetlistActivity managerSetlistActivity);
     void inject(ServerFragment serverFragment);
     void inject(SetlistsFragment setlistsFragment);
+    void inject(AuthenticationDialog authenticationDialog);
 
 }

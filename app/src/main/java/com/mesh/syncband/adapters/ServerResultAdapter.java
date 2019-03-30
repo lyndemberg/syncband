@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.mesh.syncband.R;
-import com.mesh.syncband.grpc.service.DeviceData;
+import com.mesh.syncband.grpc.DeviceData;
 
 import java.util.ArrayList;
 import java.util.List;

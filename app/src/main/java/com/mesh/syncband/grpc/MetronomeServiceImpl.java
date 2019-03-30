@@ -1,30 +1,34 @@
 package com.mesh.syncband.grpc;
 
-import com.mesh.syncband.database.ProfileRepository;
-import com.mesh.syncband.grpc.service.Confirmation;
-import com.mesh.syncband.grpc.service.Credentials;
-import com.mesh.syncband.grpc.service.DeviceData;
-import com.mesh.syncband.grpc.service.MetronomeServiceGrpc;
-import com.mesh.syncband.grpc.service.SongStart;
-import com.mesh.syncband.grpc.service.Void;
+import android.content.Context;
+import android.widget.Toast;
 import com.mesh.syncband.model.Setlist;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.grpc.stub.StreamObserver;
 
 public class MetronomeServiceImpl extends MetronomeServiceGrpc.MetronomeServiceImplBase {
 
+    private static final String TAG = ".MetronomeServiceImpl";
     private DeviceData deviceData;
     private Setlist setlist;
     private String password;
-    private List<StreamObserver<SongStart>> observers = new ArrayList<>();
+    private Map<DeviceData,StreamObserver<Flow>> observers = new HashMap<>();
+    private Context context;
 
     public MetronomeServiceImpl(DeviceData deviceData, Setlist setlist, String password) {
         this.deviceData = deviceData;
         this.setlist = setlist;
         this.password = password;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 
     @Override
@@ -34,20 +38,37 @@ public class MetronomeServiceImpl extends MetronomeServiceGrpc.MetronomeServiceI
     }
 
     @Override
-    public void connect(Credentials request, StreamObserver<Confirmation> responseObserver) {
+    public void connect(Credentials request, StreamObserver<Flow> responseObserver) {
         if(!request.getPassword().equals(password)){
-            Confirmation confirmation = Confirmation.newBuilder().setStatus(false).build();
-            responseObserver.onNext(confirmation);
+            Flow flowFail = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_FAIL).build();
+            responseObserver.onNext(flowFail);
+            responseObserver.onCompleted();
         }else{
-            Confirmation confirmation = Confirmation.newBuilder().setStatus(true).build();
-            responseObserver.onNext(confirmation);
+            Flow flowSuccess = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_SUCCESS).build();
+            responseObserver.onNext(flowSuccess);
+            observers.put(request.getDevice(), responseObserver);
+            Toast.makeText(context,"Cliente: "+request.getDevice().getNickname()+" conectado!",Toast.LENGTH_LONG).show();
         }
-        responseObserver.onCompleted();
     }
 
     @Override
-    public void initStream(Void request, StreamObserver<SongStart> responseObserver) {
+    public void disconnect(DeviceData request, StreamObserver<Void> responseObserver) {
+        observers.remove(request);
+        responseObserver.onNext(Void.newBuilder().build());
+        responseObserver.onCompleted();
+    }
 
+    public void sendSongStart(){
+
+    }
+
+    public void sendDisconnectAllObservers(){
+        Flow flowDisconnect = Flow.newBuilder().setTypeFlow(Flow.Type.DISCONNECT).build();
+        for(Map.Entry<DeviceData, StreamObserver<Flow>> observerEntry: observers.entrySet()){
+            StreamObserver<Flow> observer = observerEntry.getValue();
+            observer.onNext(flowDisconnect);
+            observer.onCompleted();
+        }
     }
 
 }

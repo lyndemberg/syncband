@@ -20,11 +20,12 @@ import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
+import com.mesh.syncband.database.SongRepository;
 import com.mesh.syncband.grpc.MetronomeServer;
-import com.mesh.syncband.grpc.service.DeviceData;
 import com.mesh.syncband.model.Profile;
 import com.mesh.syncband.model.Setlist;
-import com.stealthcopter.networktools.IPTools;
+import com.mesh.syncband.model.Song;
+import com.mesh.syncband.valueobject.ServerTaskProgress;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,9 +38,11 @@ public class ServerFragment extends Fragment {
     @Inject
     SetlistRepository setlistRepository;
     @Inject
-    ProfileRepository profileRepository;
+    SongRepository songRepository;
     @Inject
     MetronomeServer metronomeServer;
+    @Inject
+    ProfileRepository profileRepository;
 
     private TextInputEditText inputPassword;
     private Spinner spinnerSetlists;
@@ -136,28 +139,30 @@ public class ServerFragment extends Fragment {
         inputPassword.setEnabled(true);
     }
 
-    public class ServerTask extends AsyncTask<String,Boolean,Void> {
+    public class ServerTask extends AsyncTask<String,ServerTaskProgress,Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
-            Profile profile = profileRepository.getProfileSync();
-            Setlist setlist = setlistRepository.findByNameSync(strings[0]);
-            DeviceData deviceData = DeviceData.newBuilder().setHost(IPTools.getLocalIPv4Address().getHostAddress())
-                    .setNickname(profile.getNickName())
-                    .setFunction(profile.getFunction())
-                    .build();
             String password = strings[1];
+            Setlist setlist = setlistRepository.findByNameSync(strings[0]);
+            List<Song> songs = songRepository.findAllBySetlistSync(setlist.getId());
+            Profile profile = profileRepository.getProfileSync();
 
-            try {
-                metronomeServer.start(deviceData,setlist,password);
-                publishProgress(true);
-                metronomeServer.blockUntilShutdown();
-            } catch (IOException e) {
-                cancel(true);
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                cancel(true);
-                e.printStackTrace();
+            if(profile==null){
+                publishProgress(ServerTaskProgress.PROFILE_NULL);
+            }else if(songs == null){
+                publishProgress(ServerTaskProgress.SETLIST_SONGS_EMPTY);
+            }else{
+                try {
+                    metronomeServer.start(setlist, songs, password);
+                    metronomeServer.blockUntilShutdown();
+                } catch (IOException e) {
+                    cancel(true);
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    cancel(true);
+                    e.printStackTrace();
+                }
             }
 
             return null;
@@ -165,22 +170,32 @@ public class ServerFragment extends Fragment {
 
 
         @Override
-        protected void onProgressUpdate(Boolean... values) {
-            if(values[0]){
-                updateViewInRunning();
+        protected void onProgressUpdate(ServerTaskProgress... values) {
+            ServerTaskProgress progress = values[0];
+            switch (progress){
+                case PROFILE_NULL:
+                    Toast.makeText(getContext(), "Perfil não definido!",Toast.LENGTH_LONG).show();
+                    break;
+                case SETLIST_SONGS_EMPTY:
+                    Toast.makeText(getContext(), "Nenhuma música na setlist!",Toast.LENGTH_LONG).show();
+                    break;
+                case RUNNING:
+                    updateViewInRunning();
+                    Toast.makeText(getContext(), "Servidor iniciado!",Toast.LENGTH_LONG).show();
+                    break;
             }
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             updateViewWhenNotRunning();
-            Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(),"Servidor desligado",Toast.LENGTH_LONG).show();
         }
 
         @Override
         protected void onCancelled() {
             updateViewWhenNotRunning();
-            Toast.makeText(getActivity(),"Servidor desligado",Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(),"Não foi possível iniciar o server!",Toast.LENGTH_LONG).show();
         }
     }
 
