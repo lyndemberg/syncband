@@ -94,8 +94,12 @@ public class ServerFragment extends Fragment {
             public void onClick(View view) {
                 String setlistSelected = spinnerSetlists.getSelectedItem().toString();
                 String password = inputPassword.getText().toString();
-                ServerTask serverTask = new ServerTask();
-                serverTask.execute(setlistSelected, password);
+                if(password==null || password.equals("")){
+                    Toast.makeText(getContext(),"Preencha o campo da senha",Toast.LENGTH_LONG).show();
+                }else{
+                    ServerTask serverTask = new ServerTask();
+                    serverTask.execute(setlistSelected, password);
+                }
             }
         });
         return view;
@@ -155,6 +159,7 @@ public class ServerFragment extends Fragment {
             }else{
                 try {
                     metronomeServer.start(setlist, songs, password);
+                    publishProgress(ServerTaskProgress.RUNNING);
                     metronomeServer.blockUntilShutdown();
                 } catch (IOException e) {
                     cancel(true);

@@ -99,6 +99,7 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
     }
 
     public void updateCurrentSong(int position){
+        this.currentPosition = position;
         Song song = songList.get(position);
         currentSong = SongStart.newBuilder().setArtist(song.getArtist())
                             .setName(song.getName())

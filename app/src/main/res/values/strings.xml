@@ -31,6 +31,6 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-    <string name="message_disconnect">Voce nao esta conectado a nenhum servidor!\nClique no botao abaixo para buscar por um servidor</string>
+    <string name="message_disconnect">Você não está conectado a nenhum servidor!\nClique no botão abaixo para buscar</string>
 </resources>
 

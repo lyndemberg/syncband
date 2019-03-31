@@ -87,13 +87,19 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                int previous = metronomeServer.getCurrentPosition() - 1;
+                metronomeServer.updateCurrentSong(previous);
+                updateCurrentSongInView(metronomeServer.getCurrentSong());
+                updateButtonsPreviousAndNext();
             }
         });
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                int next = metronomeServer.getCurrentPosition() + 1;
+                metronomeServer.updateCurrentSong(next);
+                updateCurrentSongInView(metronomeServer.getCurrentSong());
+                updateButtonsPreviousAndNext();
             }
         });
 
@@ -118,16 +124,16 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
     private void updateButtonsPreviousAndNext(){
         int size = metronomeServer.getSongList().size();
-        int position = metronomeServer.getCurrentPosition();
-        if(position < size){
-            nextButton.setVisibility(View.VISIBLE);
+        int currentPosition = metronomeServer.getCurrentPosition();
+        if((currentPosition + 1) < size){
+            nextButton.setEnabled(true);
         }else{
-            nextButton.setVisibility(View.INVISIBLE);
+            nextButton.setEnabled(false);
         }
-        if(size>position){
-            nextButton.setVisibility(View.VISIBLE);
+        if((currentPosition-1)!=-1){
+            previousButton.setEnabled(true);
         }else{
-            nextButton.setVisibility(View.INVISIBLE);
+            previousButton.setEnabled(false);
         }
     }
 
@@ -137,12 +143,16 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         buttonSearch.setVisibility(View.INVISIBLE);
         //visible
         status.setVisibility(View.VISIBLE);
+        status.setText("Server ligado");
         currentBpm.setVisibility(View.VISIBLE);
         currentSong.setVisibility(View.VISIBLE);
         layoutVolume.setVisibility(View.VISIBLE);
         previousButton.setVisibility(View.VISIBLE);
         nextButton.setVisibility(View.VISIBLE);
+        currentSong.setVisibility(View.VISIBLE);
+        currentBpm.setVisibility(View.VISIBLE);
         updateButtonsPreviousAndNext();
+        updateCurrentSongInView(metronomeServer.getCurrentSong());
     }
 
     private void showInClient(){

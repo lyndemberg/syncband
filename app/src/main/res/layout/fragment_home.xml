@@ -74,7 +74,7 @@
         app:layout_constraintTop_toBottomOf="@+id/status" />
 
     <ImageButton
-        android:id="@+id/button_previous"
+        android:id="@+id/button_next"
         android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -84,10 +84,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/current_bpm"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_skip_previous" />
+        app:srcCompat="@drawable/ic_skip_next" />
 
     <ImageButton
-        android:id="@+id/button_next"
+        android:id="@+id/button_previous"
         android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
         app:layout_constraintEnd_toStartOf="@+id/current_bpm"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_skip_next" />
+        app:srcCompat="@drawable/ic_skip_previous" />
 
     <LinearLayout
         android:visibility="invisible"
