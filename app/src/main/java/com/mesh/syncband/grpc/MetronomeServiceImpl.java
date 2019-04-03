@@ -14,7 +14,7 @@ public class MetronomeServiceImpl extends MetronomeServiceGrpc.MetronomeServiceI
     private DeviceData deviceData;
     private Setlist setlist;
     private String password;
-    private Map<DeviceData,StreamObserver<Flow>> observers = new HashMap<>();
+    private Map<DeviceData,StreamObserver<Data>> observers = new HashMap<>();
     private Context context;
 
     public MetronomeServiceImpl(DeviceData deviceData, Setlist setlist, String password) {
@@ -38,13 +38,13 @@ public class MetronomeServiceImpl extends MetronomeServiceGrpc.MetronomeServiceI
     }
 
     @Override
-    public void connect(Credentials request, StreamObserver<Flow> responseObserver) {
+    public void connect(Credentials request, StreamObserver<Data> responseObserver) {
         if(!request.getPassword().equals(password)){
-            Flow flowFail = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_FAIL).build();
+            Data flowFail = Data.newBuilder().setType(Data.Type.AUTHORIZATION_FAIL).build();
             responseObserver.onNext(flowFail);
             responseObserver.onCompleted();
         }else{
-            Flow flowSuccess = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_SUCCESS).build();
+            Data flowSuccess = Data.newBuilder().setType(Data.Type.AUTHORIZATION_SUCCESS).build();
             responseObserver.onNext(flowSuccess);
             observers.put(request.getDevice(), responseObserver);
             Toast.makeText(context,"Cliente: "+request.getDevice().getNickname()+" conectado!",Toast.LENGTH_LONG).show();
@@ -63,9 +63,9 @@ public class MetronomeServiceImpl extends MetronomeServiceGrpc.MetronomeServiceI
     }
 
     public void sendDisconnectAllObservers(){
-        Flow flowDisconnect = Flow.newBuilder().setTypeFlow(Flow.Type.DISCONNECT).build();
-        for(Map.Entry<DeviceData, StreamObserver<Flow>> observerEntry: observers.entrySet()){
-            StreamObserver<Flow> observer = observerEntry.getValue();
+        Data flowDisconnect = Data.newBuilder().setType(Data.Type.DISCONNECT).build();
+        for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
+            StreamObserver<Data> observer = observerEntry.getValue();
             observer.onNext(flowDisconnect);
             observer.onCompleted();
         }

@@ -3,18 +3,6 @@ syntax="proto3";
 option java_package="com.mesh.syncband.grpc";
 option java_multiple_files = true;
 
-message Timestamp{
-    // Represents seconds of UTC time since Unix epoch
-    // 1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
-    // 9999-12-31T23:59:59Z inclusive.
-    int64 seconds = 1;
-
-    // Non-negative fractions of a second at nanosecond resolution. Negative
-    // second values with fractions must still have non-negative nanos values
-    // that count forward in time. Must be from 0 to 999,999,999
-    // inclusive.
-    int32 nanos = 2;
-}
 message Void{
 
 }
@@ -22,17 +10,18 @@ message SongStart{
     string name = 1;
     string artist = 2;
     int32 bpm = 3;
-    Timestamp start = 4;
+    string stamp = 4;
 }
-message Flow{
+message Data{
     enum Type {
         SONG_START = 0;
-        AUTHORIZATION_SUCCESS = 1;
-        AUTHORIZATION_FAIL = 2;
-        DISCONNECT = 3;
+        SONG_PAUSE = 1;
+        AUTHORIZATION_SUCCESS = 2;
+        AUTHORIZATION_FAIL = 3;
+        DISCONNECT = 4;
     }
 
-    Type typeFlow = 1;
+    Type type = 1;
     SongStart song = 2;
 }
 message DeviceData {
@@ -50,7 +39,7 @@ message Confirmation{
 
 service MetronomeService {
     rpc ping(Void) returns (DeviceData);
-    rpc connect(Credentials) returns (stream Flow);
+    rpc connect(Credentials) returns (stream Data);
     rpc disconnect(DeviceData) returns (Void);
 }
 

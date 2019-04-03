@@ -12,9 +12,10 @@ import io.grpc.netty.NettyChannelBuilder;
 
 public class MetronomeClient {
 
-    private static final String TAG = ".MetronomeServer";
+    private static final String TAG = ".MetronomeClient";
 
     private ManagedChannel channel;
+    private SongStart currentSong;
     private Context context;
     private boolean isConnected;
     private DeviceData serverData;
@@ -25,11 +26,10 @@ public class MetronomeClient {
         this.context = context;
     }
 
-    public Iterator<Flow> connect(DeviceData serverData, Credentials credentials){
+    public Iterator<Data> connect(DeviceData serverData, Credentials credentials){
         channel = NettyChannelBuilder.forAddress(serverData.getHost(), PropertiesUtil.PORT_SERVER_GRPC).usePlaintext().build();
         stub = MetronomeServiceGrpc.newBlockingStub(channel);
-        Iterator<Flow> connect = stub.connect(credentials);
-
+        Iterator<Data> connect = stub.connect(credentials);
         return connect;
     }
 
@@ -49,5 +49,29 @@ public class MetronomeClient {
 
     public void setConnected(boolean connected) {
         isConnected = connected;
+    }
+
+    public SongStart getCurrentSong() {
+        return currentSong;
+    }
+
+    public void setCurrentSong(SongStart currentSong) {
+        this.currentSong = currentSong;
+    }
+
+    public DeviceData getServerData() {
+        return serverData;
+    }
+
+    public void setServerData(DeviceData serverData) {
+        this.serverData = serverData;
+    }
+
+    public DeviceData getClientData() {
+        return clientData;
+    }
+
+    public void setClientData(DeviceData clientData) {
+        this.clientData = clientData;
     }
 }

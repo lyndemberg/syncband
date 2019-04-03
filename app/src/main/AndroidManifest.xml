@@ -31,6 +31,9 @@
         <service
             android:name=".services.SearchService"
             android:exported="false"></service>
+        <service
+            android:name=".services.MetronomeService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

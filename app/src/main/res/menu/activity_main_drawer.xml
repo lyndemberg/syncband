@@ -5,7 +5,7 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home_black_24dp"
-            android:title="Syncband" />
+            android:title="Metrônomo" />
         <item
             android:id="@+id/nav_server"
             android:icon="@drawable/ic_speaker_phone_black_40dp"

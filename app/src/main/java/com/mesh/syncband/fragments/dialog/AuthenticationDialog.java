@@ -16,7 +16,6 @@ import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.grpc.Credentials;
 import com.mesh.syncband.grpc.DeviceData;
-import com.mesh.syncband.grpc.Flow;
 import com.mesh.syncband.grpc.MetronomeClient;
 import com.mesh.syncband.model.Profile;
 import com.stealthcopter.networktools.IPTools;

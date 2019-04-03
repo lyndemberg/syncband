@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.grpc.Server;
+import io.grpc.StatusRuntimeException;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
 
@@ -23,7 +24,7 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
 
     private static final String TAG = ".MetronomeServer";
 
-    private Map<DeviceData,StreamObserver<Flow>> observers = new HashMap<>();
+    private Map<DeviceData,StreamObserver<Data>> observers = new HashMap<>();
 
     private Setlist setlist;
     private String password;
@@ -33,7 +34,7 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
     private Server server;
     private boolean running = false;
     private Context context;
-
+    private SongStart songRunning;
     private SongStart currentSong;
     private List<Song> songList;
     private int currentPosition = 0;
@@ -42,7 +43,7 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
         this.context = context;
         this.profileDao = profileDao;
         this.currentSong = SongStart.newBuilder().setArtist("")
-                .setName("").setBpm(0).setStart(Timestamp.newBuilder().setSeconds(0).setNanos(0)).build();
+                .setName("").setBpm(0).build();
     }
 
     public void start(Setlist set, List<Song> songs, String pass) throws IOException {
@@ -76,11 +77,15 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
 
     public void stop() {
         if (server != null) {
-            Flow flowDisconnect = Flow.newBuilder().setTypeFlow(Flow.Type.DISCONNECT).build();
-            for(Map.Entry<DeviceData, StreamObserver<Flow>> observerEntry: observers.entrySet()){
-                StreamObserver<Flow> observer = observerEntry.getValue();
-                observer.onNext(flowDisconnect);
-                observer.onCompleted();
+            Data flowDisconnect = Data.newBuilder().setType(Data.Type.DISCONNECT).build();
+            for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
+                StreamObserver<Data> observer = observerEntry.getValue();
+                try{
+                    observer.onNext(flowDisconnect);
+                    observer.onCompleted();
+                }catch (StatusRuntimeException e){
+                    continue;
+                }
             }
             server.shutdown();
             running = false;
@@ -104,17 +109,40 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
         currentSong = SongStart.newBuilder().setArtist(song.getArtist())
                             .setName(song.getName())
                             .setBpm(song.getBpm()).build();
-        notifySong();
     }
 
-    private void notifySong() {
-        Flow songStart = Flow.newBuilder().setTypeFlow(Flow.Type.SONG_START)
-                .setSong(currentSong).build();
-        for(Map.Entry<DeviceData, StreamObserver<Flow>> observerEntry: observers.entrySet()){
-            StreamObserver<Flow> observer = observerEntry.getValue();
-            observer.onNext(songStart);
+    public void notifySong() {
+        Data songStart = Data.newBuilder().setType(Data.Type.SONG_START)
+                .setSong(this.currentSong).build();
+        for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
+            StreamObserver<Data> observer = observerEntry.getValue();
+            try{
+                observer.onNext(songStart);
+            }catch (StatusRuntimeException e){
+                continue;
+            }
         }
     }
+
+    public void notifyPause(){
+        Data songStart = Data.newBuilder().setType(Data.Type.SONG_PAUSE).build();
+        for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
+            StreamObserver<Data> observer = observerEntry.getValue();
+            try{
+                observer.onNext(songStart);
+            }catch (StatusRuntimeException e){
+                continue;
+            }
+        }
+    }
+
+//    public void notifyPlayPause(){
+//        Data data = Data.newBuilder().setType(Data.Type.PLAY_PAUSE_SONG).build();
+//        for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
+//            StreamObserver<Data> observer = observerEntry.getValue();
+//            observer.onNext(data);
+//        }
+//    }
 
     public SongStart getCurrentSong() {
         return currentSong;
@@ -137,30 +165,43 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
     }
 
     @Override
-    public void connect(Credentials request, StreamObserver<Flow> responseObserver) {
+    public void connect(Credentials request, StreamObserver<Data> responseObserver) {
         if(!request.getPassword().equals(password)){
-            Flow flowFail = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_FAIL).build();
+            Data flowFail = Data.newBuilder().setType(Data.Type.AUTHORIZATION_FAIL).build();
             responseObserver.onNext(flowFail);
             responseObserver.onCompleted();
         }else{
-            Flow flowSuccess = Flow.newBuilder().setTypeFlow(Flow.Type.AUTHORIZATION_SUCCESS).build();
+            Data flowSuccess = Data.newBuilder().setType(Data.Type.AUTHORIZATION_SUCCESS).build();
             responseObserver.onNext(flowSuccess);
 
             observers.put(request.getDevice(), responseObserver);
 
-            Flow currentSong = Flow.newBuilder().setTypeFlow(Flow.Type.SONG_START).setSong(this.currentSong).build();
-            responseObserver.onNext(currentSong);
+//            Data currentSong = Data.newBuilder().setType(Data.Type.SONG_START).setSong(this.currentSong).build();
+//            responseObserver.onNext(currentSong);
         }
     }
 
     @Override
     public void disconnect(DeviceData request, StreamObserver<Void> responseObserver) {
-        observers.remove(request);
+        StreamObserver<Data> dataStreamObserver = observers.get(request);
+        dataStreamObserver.onNext(Data.newBuilder().setType(Data.Type.DISCONNECT).build());
+        dataStreamObserver.onCompleted();
+
         responseObserver.onNext(Void.newBuilder().build());
         responseObserver.onCompleted();
+        observers.remove(request);
     }
 
     public int getCurrentPosition() {
         return currentPosition;
+    }
+
+    public SongStart getSongRunning() {
+        return songRunning;
+    }
+
+    public void setSongRunning(SongStart songRunning) {
+        this.songRunning = songRunning;
+        notifySong();
     }
 }
