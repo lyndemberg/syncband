@@ -3,6 +3,7 @@ package com.mesh.syncband.grpc;
 import android.content.Context;
 
 import com.mesh.syncband.PropertiesUtil;
+import com.mesh.syncband.model.Song;
 
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ public class MetronomeClient {
     private static final String TAG = ".MetronomeClient";
 
     private ManagedChannel channel;
-    private SongStart currentSong;
+    private Song currentSong;
     private Context context;
     private boolean isConnected;
     private DeviceData serverData;
@@ -51,11 +52,11 @@ public class MetronomeClient {
         isConnected = connected;
     }
 
-    public SongStart getCurrentSong() {
+    public Song getCurrentSong() {
         return currentSong;
     }
 
-    public void setCurrentSong(SongStart currentSong) {
+    public void setCurrentSong(Song currentSong) {
         this.currentSong = currentSong;
     }
 

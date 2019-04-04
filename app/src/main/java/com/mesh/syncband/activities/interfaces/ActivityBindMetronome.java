@@ -1,4 +1,4 @@
-package com.mesh.syncband.interfaces;
+package com.mesh.syncband.activities.interfaces;
 
 import com.mesh.syncband.services.IMetronome;
 

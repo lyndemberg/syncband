@@ -9,12 +9,15 @@ import android.media.SoundPool;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.mesh.syncband.R;
+import com.mesh.syncband.grpc.SongStart;
 import com.mesh.syncband.metronome.Metronome;
 
+import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -73,22 +76,14 @@ public class MetronomeService extends Service implements IMetronome {
     }
 
     @Override
-    public void play(int bpm) {
-//        Log.d(TAG,"play: "+bpm+" - start: "+start);
-//
+    public void play(int bpm, Long start) {
+        Log.d(TAG,"start======>"+start);
         long timePerClick = 60000 / bpm;
+        long stampToStart = start + 500;
+        while(stampToStart > System.currentTimeMillis()){
+            Log.d(TAG,"Wait for start");
+        }
         executor.scheduleAtFixedRate(task, 0, timePerClick, TimeUnit.MILLISECONDS);
-//
-//        long timeServer = Long.valueOf(start);
-        long actual = System.currentTimeMillis();
-//        long delay = actual - timeServer;
-        //quantos já tocaram de acordo com o momento atual....
-        //prever próximo intervalo
-//        quantos BPM cabem no delay
-//        long l = delay / timePerClick;
-
-
-//        Log.d(TAG,"chegou aqui depois do schedule");
         playing = true;
     }
 

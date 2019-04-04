@@ -28,22 +28,17 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
 
     private Setlist setlist;
     private String password;
-
     private ProfileDao profileDao;
-
     private Server server;
     private boolean running = false;
     private Context context;
-    private SongStart songRunning;
-    private SongStart currentSong;
+    private Song currentSong;
     private List<Song> songList;
     private int currentPosition = 0;
 
     public MetronomeServer(Context context, ProfileDao profileDao){
         this.context = context;
         this.profileDao = profileDao;
-        this.currentSong = SongStart.newBuilder().setArtist("")
-                .setName("").setBpm(0).build();
     }
 
     public void start(Setlist set, List<Song> songs, String pass) throws IOException {
@@ -57,10 +52,7 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
 
         server.start();
         running = true;
-        Song first = songList.get(currentPosition);
-        currentSong = SongStart.newBuilder().setArtist(first.getArtist())
-                                        .setName(first.getName())
-                                        .setBpm(first.getBpm()).build();
+        currentSong = songList.get(currentPosition);
 
         Log.i(TAG, "Server started, listening on " + PropertiesUtil.PORT_SERVER_GRPC);
 
@@ -105,19 +97,19 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
 
     public void updateCurrentSong(int position){
         this.currentPosition = position;
-        Song song = songList.get(position);
-        currentSong = SongStart.newBuilder().setArtist(song.getArtist())
-                            .setName(song.getName())
-                            .setBpm(song.getBpm()).build();
+        currentSong = songList.get(position);
     }
 
-    public void notifySong() {
-        Data songStart = Data.newBuilder().setType(Data.Type.SONG_START)
-                .setSong(this.currentSong).build();
+    public void notifySong(Long start) {
+        SongStart build = SongStart.newBuilder().setName(currentSong.getName())
+                .setArtist(currentSong.getArtist()).setBpm(currentSong.getBpm())
+                .setStamp(String.valueOf(start)).build();
+        Data data = Data.newBuilder().setType(Data.Type.SONG_START)
+                .setSong(build).build();
         for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
-            StreamObserver<Data> observer = observerEntry.getValue();
+            final StreamObserver<Data> observer = observerEntry.getValue();
             try{
-                observer.onNext(songStart);
+                observer.onNext(data);
             }catch (StatusRuntimeException e){
                 continue;
             }
@@ -125,26 +117,18 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
     }
 
     public void notifyPause(){
-        Data songStart = Data.newBuilder().setType(Data.Type.SONG_PAUSE).build();
+        Data data = Data.newBuilder().setType(Data.Type.SONG_PAUSE).build();
         for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
             StreamObserver<Data> observer = observerEntry.getValue();
             try{
-                observer.onNext(songStart);
+                observer.onNext(data);
             }catch (StatusRuntimeException e){
                 continue;
             }
         }
     }
 
-//    public void notifyPlayPause(){
-//        Data data = Data.newBuilder().setType(Data.Type.PLAY_PAUSE_SONG).build();
-//        for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
-//            StreamObserver<Data> observer = observerEntry.getValue();
-//            observer.onNext(data);
-//        }
-//    }
-
-    public SongStart getCurrentSong() {
+    public Song getCurrentSong() {
         return currentSong;
     }
 
@@ -175,9 +159,6 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
             responseObserver.onNext(flowSuccess);
 
             observers.put(request.getDevice(), responseObserver);
-
-//            Data currentSong = Data.newBuilder().setType(Data.Type.SONG_START).setSong(this.currentSong).build();
-//            responseObserver.onNext(currentSong);
         }
     }
 
@@ -196,12 +177,4 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
         return currentPosition;
     }
 
-    public SongStart getSongRunning() {
-        return songRunning;
-    }
-
-    public void setSongRunning(SongStart songRunning) {
-        this.songRunning = songRunning;
-        notifySong();
-    }
 }

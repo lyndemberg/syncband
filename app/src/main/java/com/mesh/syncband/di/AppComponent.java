@@ -1,5 +1,6 @@
 package com.mesh.syncband.di;
 
+import com.mesh.syncband.activities.MainActivity;
 import com.mesh.syncband.activities.ManagerSetlistActivity;
 import com.mesh.syncband.fragments.HomeFragment;
 import com.mesh.syncband.fragments.PerfilFragment;
@@ -14,7 +15,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = {AppModule.class})
 public interface AppComponent {
-
+    void inject(MainActivity homeFragment);
     void inject(HomeFragment homeFragment);
     void inject(PerfilFragment perfilFragment);
     void inject(ManagerSetlistActivity managerSetlistActivity);

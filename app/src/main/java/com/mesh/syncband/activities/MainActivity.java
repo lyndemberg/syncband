@@ -18,26 +18,35 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 
+import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.fragments.HomeFragment;
 import com.mesh.syncband.fragments.PerfilFragment;
 import com.mesh.syncband.fragments.ServerFragment;
 import com.mesh.syncband.fragments.SetlistsFragment;
-import com.mesh.syncband.interfaces.ActivityBindMetronome;
+import com.mesh.syncband.activities.interfaces.ActivityBindMetronome;
+import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.services.IMetronome;
 import com.mesh.syncband.services.MetronomeService;
 
-import java.util.List;
+import javax.inject.Inject;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, ActivityBindMetronome {
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener, ActivityBindMetronome, ActivityHandlerDrawer {
 
     private static final String TAG = "activities.MainActivity";
 
+    @Inject
+    MetronomeServer metronomeServer;
+
     DrawerLayout drawer;
     NavigationView navigationView;
+    Menu navigationMenu;
 
     private Intent intentMetronome;
     private IMetronome iMetronome;
@@ -83,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        this.navigationMenu = navigationView.getMenu();
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
@@ -92,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         intentMetronome = new Intent(this,MetronomeService.class);
-//        startService(intentMetronome);
+        ((MainApplication) getApplicationContext()).getComponent().inject(this);
 
     }
 
@@ -167,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentClass = HomeFragment.class;
         }
 
+
         Fragment fragmentByTag = getSupportFragmentManager().findFragmentByTag(fragmentClass.getSimpleName());
         if(fragmentByTag!=null){
             replaceFragment(fragmentByTag,fragmentClass.getSimpleName());
@@ -206,7 +217,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onDestroy() {
+        stopService(intentMetronome);
+        metronomeServer.stop();
+        super.onDestroy();
+    }
+
+    @Override
     public IMetronome getMetronomeService() {
         return iMetronome;
+    }
+
+    @Override
+    public void disableDrawerServer() {
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        setlistItem.setEnabled(false);
+        perfilItem.setEnabled(false);
+    }
+
+    @Override
+    public void enableDrawerServer() {
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        setlistItem.setEnabled(true);
+        perfilItem.setEnabled(true);
+    }
+
+    @Override
+    public void disableDrawerClient() {
+        MenuItem serverItem = navigationMenu.findItem(R.id.nav_server);
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        serverItem.setEnabled(false);
+        setlistItem.setEnabled(false);
+        perfilItem.setEnabled(false);
+    }
+
+    @Override
+    public void enableDrawerClient() {
+        MenuItem serverItem = navigationMenu.findItem(R.id.nav_server);
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        serverItem.setEnabled(true);
+        setlistItem.setEnabled(true);
+        perfilItem.setEnabled(true);
     }
 }

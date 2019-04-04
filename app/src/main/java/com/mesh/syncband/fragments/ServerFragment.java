@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
 import com.mesh.syncband.database.SongRepository;
@@ -86,6 +87,7 @@ public class ServerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 metronomeServer.stop();
+                ((ActivityHandlerDrawer) getActivity()).enableDrawerServer();
             }
         });
 
@@ -187,6 +189,7 @@ public class ServerFragment extends Fragment {
                 case RUNNING:
                     updateViewInRunning();
                     Toast.makeText(getContext(), "Servidor iniciado!",Toast.LENGTH_LONG).show();
+                    ((ActivityHandlerDrawer) getActivity()).disableDrawerServer();
                     break;
             }
         }

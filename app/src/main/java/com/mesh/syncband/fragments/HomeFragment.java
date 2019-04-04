@@ -1,15 +1,10 @@
 package com.mesh.syncband.fragments;
 
 import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,6 +21,7 @@ import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.fragments.dialog.ListServersDialog;
 import com.mesh.syncband.grpc.Credentials;
@@ -34,10 +30,10 @@ import com.mesh.syncband.grpc.Data;
 import com.mesh.syncband.grpc.MetronomeClient;
 import com.mesh.syncband.grpc.MetronomeServer;
 import com.mesh.syncband.grpc.SongStart;
-import com.mesh.syncband.interfaces.ActivityBindMetronome;
+import com.mesh.syncband.activities.interfaces.ActivityBindMetronome;
 import com.mesh.syncband.model.Profile;
+import com.mesh.syncband.model.Song;
 import com.mesh.syncband.services.IMetronome;
-import com.mesh.syncband.services.MetronomeService;
 import com.stealthcopter.networktools.IPTools;
 
 import java.util.Iterator;
@@ -66,6 +62,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
     private ImageButton previousButton;
     private ImageButton nextButton;
     private Button buttonPlayPause;
+    private TextView msgWaiting;
 
     private IMetronome localMetronome;
 
@@ -133,14 +130,25 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
             public void onClick(View view) {
                 if(localMetronome != null){
                     if(localMetronome.isPlaying()){
-                        metronomeServer.notifyPause();
                         localMetronome.pause();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                metronomeServer.notifyPause();
+                            }
+                        }).start();
                         buttonPlayPause.setText("Tocar");
                         showButtonsPreviousAndNext();
                     }else{
-                        SongStart current = metronomeServer.getCurrentSong();
-                        metronomeServer.notifySong();
-                        localMetronome.play(current.getBpm());
+                        final long start = System.currentTimeMillis();
+                        Log.d(TAG,"START---->"+start);
+                        localMetronome.play(metronomeServer.getCurrentSong().getBpm(),start);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                metronomeServer.notifySong(start);
+                            }
+                        }).start();
                         buttonPlayPause.setText("Pausar");
                         hideButtonsPreviousAndNext();
                     }
@@ -166,6 +174,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
         layoutVolume = view.findViewById(R.id.layout_volume);
         messageDisconnect = view.findViewById(R.id.message_disconnect);
+        msgWaiting = view.findViewById(R.id.msg);
 
         return view;
     }
@@ -219,6 +228,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         }else{
             buttonPlayPause.setText("Tocar");
         }
+        msgWaiting.setVisibility(View.INVISIBLE);
     }
 
     private void showInClient(){
@@ -237,6 +247,12 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         if(metronomeClient.getCurrentSong() != null){
             updateCurrentSongInView(metronomeClient.getCurrentSong());
         }
+        if(metronomeClient.getCurrentSong() != null){
+            msgWaiting.setVisibility(View.INVISIBLE);
+        }else{
+            msgWaiting.setVisibility(View.VISIBLE);
+        }
+
         buttonPlayPause.setVisibility(View.INVISIBLE);
     }
 
@@ -253,11 +269,19 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         messageDisconnect.setVisibility(View.VISIBLE);
         buttonSearch.setVisibility(View.VISIBLE);
         buttonPlayPause.setVisibility(View.INVISIBLE);
+        msgWaiting.setVisibility(View.INVISIBLE);
     }
 
-    private void updateCurrentSongInView(SongStart songStart){
-        currentSong.setText(songStart.getName()+" - "+songStart.getArtist());
-        currentBpm.setText(songStart.getBpm()+"");
+    private void updateCurrentSongInView(Song song){
+        currentSong.setText(song.getName()+" - "+song.getArtist());
+        currentBpm.setText(song.getBpm()+" BPM");
+        msgWaiting.setVisibility(View.INVISIBLE);
+    }
+
+    private void updateNotSong(){
+        currentSong.setText("");
+        currentBpm.setText("");
+        msgWaiting.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -352,6 +376,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
                     metronomeClient.setServerData(serverData);
                     metronomeClient.setClientData(clientData);
                     showInClient();
+                    ((ActivityHandlerDrawer) getActivity()).disableDrawerClient();
                     break;
                 case AUTHORIZATION_FAIL:
                     Toast.makeText(getContext(),"Senha incorreta!",Toast.LENGTH_LONG).show();
@@ -359,23 +384,26 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
                     break;
                 case DISCONNECT:
                     Toast.makeText(getContext(), "Você está desconectado!",Toast.LENGTH_LONG).show();
-                    showInSearch();
                     metronomeClient.setConnected(false);
                     ((ActivityBindMetronome)getActivity()).getMetronomeService().pause();
                     metronomeClient.setClientData(null);
                     metronomeClient.setServerData(null);
+                    metronomeClient.setCurrentSong(null);
+                    showInSearch();
+                    ((ActivityHandlerDrawer) getActivity()).enableDrawerClient();
                     break;
                 case SONG_START:
-                    SongStart song = flow.getSong();
-                    ((ActivityBindMetronome)getActivity()).getMetronomeService().play(song.getBpm());
+                    SongStart start = flow.getSong();
+                    ((ActivityBindMetronome)getActivity()).getMetronomeService().play(start.getBpm(),Long.valueOf(start.getStamp()));
+                    Log.d(TAG,"START---->"+start.getStamp());
+                    Song song = new Song(start.getName(), start.getArtist(), start.getBpm());
                     metronomeClient.setCurrentSong(song);
-                    Log.d(TAG,"CHEGOU START" + song.toString());
                     updateCurrentSongInView(song);
                     break;
                 case SONG_PAUSE:
                     ((ActivityBindMetronome)getActivity()).getMetronomeService().pause();
+                    updateNotSong();
                     metronomeClient.setCurrentSong(null);
-                    Log.d(TAG,"CHEGOU PAUSE");
                     break;
             }
         }
@@ -389,5 +417,6 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         protected void onPostExecute(Void aVoid) {
         }
     }
+
 
 }
