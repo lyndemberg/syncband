@@ -74,12 +74,10 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle("Perfil");
     }
 
     @Override
     public void onStart() {
-        super.onStart();
         profileRepository.getProfile().observe(this, new Observer<Profile>() {
             @Override
             public void onChanged(@Nullable Profile prof) {
@@ -90,5 +88,6 @@ public class PerfilFragment extends Fragment {
                 }
             }
         });
+        super.onStart();
     }
 }
