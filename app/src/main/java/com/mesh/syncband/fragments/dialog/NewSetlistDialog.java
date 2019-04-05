@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
-import com.mesh.syncband.R;
 import com.mesh.syncband.model.Setlist;
 
 import java.util.Date;
@@ -34,7 +33,6 @@ public class NewSetlistDialog extends DialogFragment {
         builder.setTitle("Nova setlist");
         builder.setMessage("Digite o nome da setlist");
         builder.setView(inputSetlistName);
-        builder.setIcon(R.drawable.ic_add_circle_black_24dp);
         builder.setPositiveButton("Criar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
