@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
@@ -64,6 +65,7 @@ public class PerfilFragment extends Fragment {
                     profile.setFunction(inputFunction.getText().toString());
                     profileRepository.insertProfile(profile);
                 }
+                Toast.makeText(getContext(),"Perfil atualizado!",Toast.LENGTH_SHORT).show();
             }
         });
         return view;
