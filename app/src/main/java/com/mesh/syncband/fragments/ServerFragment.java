@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
@@ -45,7 +47,9 @@ public class ServerFragment extends Fragment {
     @Inject
     ProfileRepository profileRepository;
 
+    private TextInputLayout layoutPassword;
     private TextInputEditText inputPassword;
+    private TextView messageEmptySetlists;
     private Spinner spinnerSetlists;
     private Button buttonIniciar;
     private Button buttonStop;
@@ -54,8 +58,22 @@ public class ServerFragment extends Fragment {
     private Observer<List<String>> observerListSetlists = new Observer<List<String>>() {
         @Override
         public void onChanged(@Nullable List<String> strings) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, strings);
-            spinnerSetlists.setAdapter(adapter);
+            if(strings.isEmpty()){
+                spinnerSetlists.setVisibility(View.INVISIBLE);
+                buttonIniciar.setVisibility(View.INVISIBLE);
+                buttonStop.setVisibility(View.INVISIBLE);
+                layoutPassword.setVisibility(View.INVISIBLE);
+                messageEmptySetlists.setVisibility(View.VISIBLE);
+            }else{
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, strings);
+                spinnerSetlists.setAdapter(adapter);
+                spinnerSetlists.setVisibility(View.VISIBLE);
+                buttonIniciar.setVisibility(View.VISIBLE);
+                buttonStop.setVisibility(View.INVISIBLE);
+                layoutPassword.setVisibility(View.VISIBLE);
+                messageEmptySetlists.setVisibility(View.INVISIBLE);
+            }
+
         }
     };
 
@@ -80,9 +98,11 @@ public class ServerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_server, container, false);
         spinnerSetlists = view.findViewById(R.id.spinner_setlists);
+        layoutPassword = view.findViewById(R.id.layout_input_password);
         inputPassword = view.findViewById(R.id.input_password);
         buttonIniciar = view.findViewById(R.id.buttonIniciar);
         buttonStop = view.findViewById(R.id.button_stop);
+        messageEmptySetlists = view.findViewById(R.id.msg_not_setlists);
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,19 +135,19 @@ public class ServerFragment extends Fragment {
 
     @Override
     public void onStart() {
-        super.onStart();
         setlistRepository.getAllNames().observe(this, observerListSetlists);
         if(metronomeServer.isRunning()){
             updateViewInRunning();
         }else{
             updateViewWhenNotRunning();
         }
+        super.onStart();
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         setlistRepository.getAllNames().removeObserver(observerListSetlists);
+        super.onDestroy();
     }
 
     private void updateViewInRunning(){
@@ -156,7 +176,7 @@ public class ServerFragment extends Fragment {
 
             if(profile==null){
                 publishProgress(ServerTaskProgress.PROFILE_NULL);
-            }else if(songs == null){
+            }else if(songs.isEmpty()){
                 publishProgress(ServerTaskProgress.SETLIST_SONGS_EMPTY);
             }else{
                 try {
