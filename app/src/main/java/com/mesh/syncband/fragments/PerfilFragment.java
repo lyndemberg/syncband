@@ -29,15 +29,11 @@ public class PerfilFragment extends Fragment {
     private TextInputEditText inputFunction;
     private Profile profile;
 
-    public PerfilFragment() {
-        // Required empty public constructor
-    }
-
 
     @Override
     public void onAttach(Context context) {
-        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
         super.onAttach(context);
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
     }
 
     @Override
@@ -58,6 +54,8 @@ public class PerfilFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(profile !=null){
+                    profile.setNickName(inputNickname.getText().toString());
+                    profile.setFunction(inputFunction.getText().toString());
                     profileRepository.updateProfile(profile);
                 }else{
                     profile = new Profile();
