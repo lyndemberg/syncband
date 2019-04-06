@@ -6,8 +6,11 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.InputType;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -303,7 +306,10 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
     @Override
     public void notifyServerSelected(final DeviceData deviceData) {
+
         final EditText inputPassword = new EditText(getContext());
+        inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        Log.d(TAG, inputPassword.getInputType()+"=====================");
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Insira a senha");
         builder.setMessage("Server: " + deviceData.getNickname());
