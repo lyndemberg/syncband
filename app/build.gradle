@@ -9,9 +9,9 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -54,9 +54,13 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation "com.android.support:support-annotations:27.1.1"
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+
     implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
     implementation "android.arch.lifecycle:livedata:$rootProject.roomVersion"
     annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"

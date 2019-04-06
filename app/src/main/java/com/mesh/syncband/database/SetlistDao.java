@@ -27,6 +27,8 @@ public interface SetlistDao {
     LiveData<List<Setlist>> getAll();
     @Query("SELECT name FROM setlist")
     LiveData<List<String>> getAllNames();
+    @Query("SELECT name FROM setlist")
+    List<String> getAllNamesSync();
     @Insert
     void save(Setlist setlist);
     @Delete

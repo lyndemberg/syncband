@@ -22,5 +22,4 @@ public interface AppComponent {
     void inject(ServerFragment serverFragment);
     void inject(SetlistsFragment setlistsFragment);
     void inject(AuthenticationDialog authenticationDialog);
-
 }
