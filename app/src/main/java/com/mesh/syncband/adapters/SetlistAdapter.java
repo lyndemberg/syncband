@@ -113,4 +113,5 @@ public class SetlistAdapter extends RecyclerView.Adapter<SetlistAdapter.SetlistH
     }
 
 
+
 }

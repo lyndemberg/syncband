@@ -136,6 +136,12 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
         return true;
     }
 
+    @Override
+    public void onStop() {
+        setlistAdapter.setShowCheckBox(false);
+        super.onStop();
+    }
+
     private void hideItensToRemove(){
         buttonDelete.setVisibility(View.GONE);
         buttonAdd.setVisibility(View.VISIBLE);
