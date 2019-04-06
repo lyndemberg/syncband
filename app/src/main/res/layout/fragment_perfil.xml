@@ -14,11 +14,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_account_circle_black_24dp" />
+        app:srcCompat="@drawable/ic_account_grey_100" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputLayout"
-        android:layout_width="368dp"
+        android:layout_width="314dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
@@ -36,7 +36,7 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputLayout2"
-        android:layout_width="368dp"
+        android:layout_width="313dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="28dp"
@@ -49,7 +49,7 @@
             android:id="@+id/input_function"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Funçao" />
+            android:hint="Função" />
     </android.support.design.widget.TextInputLayout>
 
 
@@ -58,13 +58,14 @@
         android:layout_width="173dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="144dp"
+        android:layout_marginBottom="8dp"
         android:text="Atualizar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
+        app:layout_constraintVertical_bias="0.161" />
 </android.support.constraint.ConstraintLayout>

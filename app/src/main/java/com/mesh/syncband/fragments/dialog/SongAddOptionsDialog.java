@@ -31,7 +31,7 @@ public class SongAddOptionsDialog extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.add_song_options, container, false);
-
+        getDialog().setTitle("Escolha uma das opções");
         ImageButton spotifyOption = view.findViewById(R.id.button_spotify_option);
         ImageButton manualOption = view.findViewById(R.id.button_manual_option);
         spotifyOption.setOnClickListener(new View.OnClickListener() {

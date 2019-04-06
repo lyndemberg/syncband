@@ -42,6 +42,7 @@ public class ListServersDialog extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.servers_dialog_fragment, container, false);
         recyclerView = view.findViewById(R.id.list_servers_result);
+        getDialog().setTitle("Buscando servidores");
         adapter = new ServerResultAdapter(getContext(), new View.OnClickListener() {
 
             @Override
@@ -66,15 +67,15 @@ public class ListServersDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SearchServersTask searchServersTask = new SearchServersTask();
-        searchServersTask.execute();
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         getDialog().getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+        progressBar.setVisibility(View.VISIBLE);
+        SearchServersTask searchServersTask = new SearchServersTask();
+        searchServersTask.execute();
     }
 
     private class SearchServersTask extends AsyncTask<Void,DeviceData,Void> {
@@ -107,11 +108,10 @@ public class ListServersDialog extends DialogFragment {
 
                         }
                     });
-
                 }
                 @Override
                 public void onFinished(ArrayList<Device> devicesFound) {
-
+                    publishProgress(null);
                 }
             });
 
@@ -121,14 +121,19 @@ public class ListServersDialog extends DialogFragment {
 
         @Override
         protected void onProgressUpdate(DeviceData... values) {
-            DeviceData deviceData = values[0];
-            adapter.addItem(deviceData);
-            adapter.notifyDataSetChanged();
+            if(values==null){
+                progressBar.setVisibility(View.INVISIBLE);
+            }else{
+                DeviceData deviceData = values[0];
+                adapter.addItem(deviceData);
+                adapter.notifyDataSetChanged();
+            }
+
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            progressBar.setVisibility(View.INVISIBLE);
+
         }
     }
 }

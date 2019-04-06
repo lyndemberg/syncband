@@ -8,7 +8,7 @@
         android:layout_centerVertical="true"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:srcCompat="@drawable/ic_speaker_phone_black_40dp"/>
+        app:srcCompat="@drawable/ic_server_grey"/>
     <LinearLayout
         android:layout_toRightOf="@+id/icon_server"
         android:layout_marginLeft="20dp"

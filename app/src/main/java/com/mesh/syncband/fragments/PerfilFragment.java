@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
@@ -28,15 +29,11 @@ public class PerfilFragment extends Fragment {
     private TextInputEditText inputFunction;
     private Profile profile;
 
-    public PerfilFragment() {
-        // Required empty public constructor
-    }
-
 
     @Override
     public void onAttach(Context context) {
-        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
         super.onAttach(context);
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
     }
 
     @Override
@@ -57,6 +54,8 @@ public class PerfilFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(profile !=null){
+                    profile.setNickName(inputNickname.getText().toString());
+                    profile.setFunction(inputFunction.getText().toString());
                     profileRepository.updateProfile(profile);
                 }else{
                     profile = new Profile();
@@ -64,6 +63,7 @@ public class PerfilFragment extends Fragment {
                     profile.setFunction(inputFunction.getText().toString());
                     profileRepository.insertProfile(profile);
                 }
+                Toast.makeText(getContext(),"Perfil atualizado!",Toast.LENGTH_SHORT).show();
             }
         });
         return view;
@@ -72,12 +72,10 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle("Perfil");
     }
 
     @Override
     public void onStart() {
-        super.onStart();
         profileRepository.getProfile().observe(this, new Observer<Profile>() {
             @Override
             public void onChanged(@Nullable Profile prof) {
@@ -88,5 +86,6 @@ public class PerfilFragment extends Fragment {
                 }
             }
         });
+        super.onStart();
     }
 }

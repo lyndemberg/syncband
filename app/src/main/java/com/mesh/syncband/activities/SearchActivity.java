@@ -37,6 +37,7 @@ public class SearchActivity extends AppCompatActivity {
     private SongResultAdapter adapter;
     private ResultReceiver searchHandler;
     private TextView searchMessage;
+    private TextView textViewInfo;
 
     private ProgressBar progressBar;
 
@@ -49,6 +50,7 @@ public class SearchActivity extends AppCompatActivity {
 
         searchHandler = new SearchResultReceiver(new Handler());
         progressBar = findViewById(R.id.progress_bar);
+        textViewInfo = findViewById(R.id.textViewInfo);
 
         Toolbar toolbar = findViewById(R.id.toolbar_search);
         setSupportActionBar(toolbar);
@@ -118,8 +120,10 @@ public class SearchActivity extends AppCompatActivity {
                 if (results.isEmpty()){
                     searchMessage.setText("Nada encontrado!");
                     searchMessage.setVisibility(View.VISIBLE);
+                    textViewInfo.setVisibility(View.INVISIBLE);
                 }else{
                     searchMessage.setVisibility(View.INVISIBLE);
+                    textViewInfo.setVisibility(View.VISIBLE);
                 }
             }else if(resultCode == RESULT_CODE_FAIL){
                 searchMessage.setText("Nao foi possivel realizar a busca!");
