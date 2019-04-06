@@ -21,10 +21,14 @@ public interface SetlistDao {
     LiveData<Setlist> findById(int id);
     @Query("SELECT * FROM setlist WHERE name=:name")
     LiveData<Setlist> findByName(String name);
+    @Query("SELECT * FROM setlist WHERE name=:name")
+    Setlist findByNameSync(String name);
     @Query("SELECT * FROM setlist")
     LiveData<List<Setlist>> getAll();
     @Query("SELECT name FROM setlist")
     LiveData<List<String>> getAllNames();
+    @Query("SELECT name FROM setlist")
+    List<String> getAllNamesSync();
     @Insert
     void save(Setlist setlist);
     @Delete

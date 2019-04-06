@@ -9,12 +9,17 @@ import com.mesh.syncband.model.Setlist;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class SetlistRepository {
 
     private final SetlistDao setlistDao;
 
-    public SetlistRepository(Context ctx) {
-        setlistDao = AppDatabase.getAppDatabase(ctx).getSetlistDao();
+    @Inject
+    public SetlistRepository(SetlistDao setlistDao) {
+        this.setlistDao = setlistDao;
     }
 
     public void insertSetlist(final Setlist setlist){
@@ -73,5 +78,8 @@ public class SetlistRepository {
         return setlistDao.findByName(name);
     }
 
+    public Setlist findByNameSync(String name){
+        return setlistDao.findByNameSync(name);
+    }
 
 }

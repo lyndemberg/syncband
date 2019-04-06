@@ -19,6 +19,8 @@ public interface SongDao {
     //access @Entity Song
     @Query("SELECT * FROM song WHERE idSetlist=:idSetlist")
     LiveData<List<Song>> findAllBySetlist(int idSetlist);
+    @Query("SELECT * FROM song WHERE idSetlist=:idSetlist")
+    List<Song> findAllBySetlistSync(int idSetlist);
     @Insert
     void save(Song song);
     @Delete

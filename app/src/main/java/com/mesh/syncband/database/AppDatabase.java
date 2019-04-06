@@ -19,21 +19,7 @@ import com.mesh.syncband.model.Song;
 @TypeConverters(RoomTypeConverters.class)
 public abstract class AppDatabase extends RoomDatabase {
 
-    private static AppDatabase INSTANCE;
-
-    abstract ProfileDao getProfileDao();
-    abstract SetlistDao getSetlistDao();
-    abstract SongDao getSongDao();
-
-    static AppDatabase getAppDatabase(Context context){
-        if(INSTANCE == null){
-            INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                    AppDatabase.class,"database-syncband")
-                    .fallbackToDestructiveMigration()
-                    .build();
-
-        }
-        return INSTANCE;
-    }
-
+    public abstract ProfileDao getProfileDao();
+    public abstract SetlistDao getSetlistDao();
+    public abstract SongDao getSongDao();
 }

@@ -95,7 +95,12 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                checkedItems.add(holder.getAdapterPosition());
+                if(isChecked){
+                    checkedItems.add(holder.getAdapterPosition());
+                }else{
+                    checkedItems.remove(holder.getAdapterPosition());
+                }
+
             }
         });
 

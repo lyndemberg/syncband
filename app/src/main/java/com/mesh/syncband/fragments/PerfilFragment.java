@@ -2,7 +2,6 @@ package com.mesh.syncband.fragments;
 
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,26 +11,35 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.model.Profile;
 
+import javax.inject.Inject;
+
 public class PerfilFragment extends Fragment {
+
+    @Inject
+    ProfileRepository profileRepository;
 
     private TextInputEditText inputNickname;
     private TextInputEditText inputFunction;
-    private ProfileRepository profileRepository;
     private Profile profile;
 
-    public PerfilFragment() {
-        // Required empty public constructor
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        profileRepository = new ProfileRepository(getContext());
+
     }
 
     @Override
@@ -46,6 +54,8 @@ public class PerfilFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if(profile !=null){
+                    profile.setNickName(inputNickname.getText().toString());
+                    profile.setFunction(inputFunction.getText().toString());
                     profileRepository.updateProfile(profile);
                 }else{
                     profile = new Profile();
@@ -53,6 +63,7 @@ public class PerfilFragment extends Fragment {
                     profile.setFunction(inputFunction.getText().toString());
                     profileRepository.insertProfile(profile);
                 }
+                Toast.makeText(getContext(),"Perfil atualizado!",Toast.LENGTH_SHORT).show();
             }
         });
         return view;
@@ -61,12 +72,10 @@ public class PerfilFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle("Perfil");
     }
 
     @Override
     public void onStart() {
-        super.onStart();
         profileRepository.getProfile().observe(this, new Observer<Profile>() {
             @Override
             public void onChanged(@Nullable Profile prof) {
@@ -77,5 +86,6 @@ public class PerfilFragment extends Fragment {
                 }
             }
         });
+        super.onStart();
     }
 }

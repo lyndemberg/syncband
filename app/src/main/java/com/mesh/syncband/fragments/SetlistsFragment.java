@@ -1,6 +1,7 @@
 package com.mesh.syncband.fragments;
 
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 import com.mesh.syncband.activities.ManagerSetlistActivity;
 import com.mesh.syncband.adapters.SetlistAdapter;
@@ -33,9 +35,13 @@ import com.mesh.syncband.model.Setlist;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSetlistListener{
 
-    private SetlistRepository setlistRepository;
+    @Inject
+    SetlistRepository setlistRepository;
+
     private MenuItem optionMenu;
 
     private FloatingActionButton buttonDelete;
@@ -48,11 +54,16 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
     }
 
     @Override
+    public void onAttach(Context context) {
+        ((MainApplication) context.getApplicationContext()).getComponent().inject(this);
+        super.onAttach(context);
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        setlistRepository = new SetlistRepository(getContext());
         setlistAdapter = new SetlistAdapter(getContext(), new ArrayList<String>(), new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,6 +134,12 @@ public class SetlistsFragment extends Fragment implements NewSetlistDialog.NewSe
             setlistAdapter.notifyDataSetChanged();
         }
         return true;
+    }
+
+    @Override
+    public void onStop() {
+        setlistAdapter.setShowCheckBox(false);
+        super.onStop();
     }
 
     private void hideItensToRemove(){

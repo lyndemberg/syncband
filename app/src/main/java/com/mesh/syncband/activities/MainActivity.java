@@ -1,7 +1,12 @@
 package com.mesh.syncband.activities;
 
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -13,23 +18,55 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
 
+import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.fragments.HomeFragment;
 import com.mesh.syncband.fragments.PerfilFragment;
 import com.mesh.syncband.fragments.ServerFragment;
 import com.mesh.syncband.fragments.SetlistsFragment;
+import com.mesh.syncband.activities.interfaces.ActivityBindMetronome;
+import com.mesh.syncband.grpc.MetronomeServer;
+import com.mesh.syncband.services.IMetronome;
+import com.mesh.syncband.services.MetronomeService;
 
-import java.util.List;
+import javax.inject.Inject;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener, ActivityBindMetronome, ActivityHandlerDrawer {
 
     private static final String TAG = "activities.MainActivity";
 
+    @Inject
+    MetronomeServer metronomeServer;
+
     DrawerLayout drawer;
     NavigationView navigationView;
+    Menu navigationMenu;
+
+    private Intent intentMetronome;
+    private IMetronome iMetronome;
+
+    //connection with services.MetronomeService
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MetronomeService.MetronomeServiceBinder connection = (MetronomeService.MetronomeServiceBinder) iBinder;
+            iMetronome = connection.getInterface();
+            Log.d(TAG,"onServiceConnected");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            iMetronome = null;
+            Log.d(TAG,"onServiceDisconnected()");
+        }
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        this.navigationMenu = navigationView.getMenu();
 
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
@@ -62,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .commit();
             navigationView.setCheckedItem(R.id.nav_home);
         }
+
+        intentMetronome = new Intent(this,MetronomeService.class);
+        ((MainApplication) getApplicationContext()).getComponent().inject(this);
+
     }
 
     @Override
@@ -135,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 fragmentClass = HomeFragment.class;
         }
 
+
         Fragment fragmentByTag = getSupportFragmentManager().findFragmentByTag(fragmentClass.getSimpleName());
         if(fragmentByTag!=null){
             replaceFragment(fragmentByTag,fragmentClass.getSimpleName());
@@ -155,4 +198,69 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
+    @Override
+    protected void onStop() {
+        if(iMetronome != null){
+            Log.d(TAG,"somente unbind");
+            unbindService(connection);
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        startService(intentMetronome);
+        boolean connected = bindService(intentMetronome, connection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG,"Metronome Service connected: "+connected);
+        super.onStart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(intentMetronome);
+        metronomeServer.stop();
+        super.onDestroy();
+    }
+
+    @Override
+    public IMetronome getMetronomeService() {
+        return iMetronome;
+    }
+
+    @Override
+    public void disableDrawerServer() {
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        setlistItem.setEnabled(false);
+        perfilItem.setEnabled(false);
+    }
+
+    @Override
+    public void enableDrawerServer() {
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        setlistItem.setEnabled(true);
+        perfilItem.setEnabled(true);
+    }
+
+    @Override
+    public void disableDrawerClient() {
+        MenuItem serverItem = navigationMenu.findItem(R.id.nav_server);
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        serverItem.setEnabled(false);
+        setlistItem.setEnabled(false);
+        perfilItem.setEnabled(false);
+    }
+
+    @Override
+    public void enableDrawerClient() {
+        MenuItem serverItem = navigationMenu.findItem(R.id.nav_server);
+        MenuItem setlistItem = navigationMenu.findItem(R.id.nav_setlists);
+        MenuItem perfilItem = navigationMenu.findItem(R.id.nav_perfil);
+        serverItem.setEnabled(true);
+        setlistItem.setEnabled(true);
+        perfilItem.setEnabled(true);
+    }
 }

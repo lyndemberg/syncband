@@ -5,15 +5,6 @@
     <string name="host_api">syncband.herokuapp.com</string>
     <string name="path_api">api/song/search</string>
 
-    <string-array name="setlists_example">
-        <item>One</item>
-        <item>Two</item>
-        <item>Three</item>
-        <item>Four</item>
-        <item>Five</item>
-        <item>Six</item>
-    </string-array>
-
 
     <!-- TODO: Remove or change this placeholder text -->
 
@@ -21,16 +12,12 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
 
-    <string name="title_activity_main">SyncBand - Home</string>
+    <string name="title_activity_main">Syncband</string>
     <string name="title_activity_server">Server</string>
     <string name="title_activity_perfil">Perfil</string>
     <string name="title_activity_setlists">Setlists</string>
     <string name="title_activity_manager_setlist">Editar setlist</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="message_disconnect">Você não está conectado a nenhum servidor!\nClique no botão abaixo para buscar</string>
 </resources>
 
