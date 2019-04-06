@@ -311,7 +311,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         Log.d(TAG, inputPassword.getInputType()+"=====================");
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Insira a senha");
+        builder.setTitle("Conectar-se a servidor");
         builder.setMessage("Server: " + deviceData.getNickname());
         builder.setView(inputPassword);
         builder.setCancelable(false);
