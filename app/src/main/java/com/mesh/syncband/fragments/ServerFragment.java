@@ -31,6 +31,7 @@ import com.mesh.syncband.model.Song;
 import com.mesh.syncband.valueobject.ServerTaskProgress;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -53,7 +54,8 @@ public class ServerFragment extends Fragment {
     private Spinner spinnerSetlists;
     private Button buttonIniciar;
     private Button buttonStop;
-    private Setlist selected;
+    private String setlistSelected;
+
 
     private Observer<List<String>> observerListSetlists = new Observer<List<String>>() {
         @Override
@@ -73,14 +75,9 @@ public class ServerFragment extends Fragment {
                 layoutPassword.setVisibility(View.VISIBLE);
                 messageEmptySetlists.setVisibility(View.INVISIBLE);
             }
-
         }
+
     };
-
-
-    public ServerFragment() {
-    }
-
 
     @Override
     public void onAttach(Context context) {
@@ -107,6 +104,7 @@ public class ServerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 metronomeServer.stop();
+                refreshSpinnerSetlists();
                 ((ActivityHandlerDrawer) getActivity()).enableDrawerServer();
             }
         });
@@ -114,7 +112,7 @@ public class ServerFragment extends Fragment {
         buttonIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String setlistSelected = spinnerSetlists.getSelectedItem().toString();
+                setlistSelected = spinnerSetlists.getSelectedItem().toString();
                 String password = inputPassword.getText().toString();
                 if(password==null || password.equals("")){
                     Toast.makeText(getContext(),"Preencha o campo da senha",Toast.LENGTH_LONG).show();
@@ -129,19 +127,25 @@ public class ServerFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        getActivity().setTitle("Server");
         super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
     public void onStart() {
-        setlistRepository.getAllNames().observe(this, observerListSetlists);
         if(metronomeServer.isRunning()){
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, Arrays.asList(setlistSelected));
+            spinnerSetlists.setAdapter(adapter);
             updateViewInRunning();
         }else{
             updateViewWhenNotRunning();
+            refreshSpinnerSetlists();
         }
         super.onStart();
+    }
+
+    private void refreshSpinnerSetlists(){
+        setlistRepository.getAllNames().observe(this, observerListSetlists);
     }
 
     @Override
