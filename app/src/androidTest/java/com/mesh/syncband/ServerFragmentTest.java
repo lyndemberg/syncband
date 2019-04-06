@@ -1,19 +1,11 @@
 package com.mesh.syncband;
 
 import android.arch.persistence.room.Room;
-import android.support.test.espresso.matcher.ViewMatchers;
-import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import com.mesh.syncband.activities.MainActivity;
 import com.mesh.syncband.database.AppDatabase;
-import com.mesh.syncband.database.AppDatabase_Impl;
-import com.mesh.syncband.database.ProfileDao;
-import com.mesh.syncband.database.ProfileRepository;
-import com.mesh.syncband.database.SetlistDao;
-import com.mesh.syncband.database.SetlistRepository;
 import com.mesh.syncband.fragments.ServerFragment;
 
 import org.junit.Before;
