@@ -3,6 +3,7 @@ package com.mesh.syncband.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +68,8 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
     private ImageButton nextButton;
     private Button buttonPlayPause;
     private TextView msgWaiting;
-
+    private AudioManager audioManager = null;
+    private SeekBar volumeBar;
     private IMetronome localMetronome;
 
     @Override
@@ -78,6 +81,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -93,9 +97,31 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
         buttonSearch = view.findViewById(R.id.button_search);
         buttonPlayPause = view.findViewById(R.id.button_play_pause);
-
+        volumeBar = view.findViewById(R.id.volume);
+        volumeBar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        volumeBar.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
         previousButton = view.findViewById(R.id.button_previous);
         nextButton = view.findViewById(R.id.button_next);
+
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onStopTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar arg0, int progress, boolean arg2)
+            {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                        progress, 0);
+            }
+        });
 
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override

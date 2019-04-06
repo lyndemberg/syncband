@@ -124,8 +124,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:max="100"
-            android:min="0"
-            android:progress="65" />
+            android:min="0" />
     </LinearLayout>
 
     <LinearLayout
