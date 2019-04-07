@@ -5,6 +5,7 @@
     tools:context=".fragments.ServerFragment" android:layout_height="match_parent" android:layout_width="match_parent">
 
     <ImageView
+        android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -28,35 +29,55 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/spinner_setlists"
-        android:layout_width="312dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="88dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/layout_input_password"
-        android:layout_width="312dp"
+    <LinearLayout
+        android:id="@+id/layout_spinner"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="64dp"
         android:layout_marginEnd="8dp"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinner_setlists">
+        app:layout_constraintTop_toBottomOf="@+id/textView2">
 
-        <android.support.design.widget.TextInputEditText
-            android:inputType="textPassword"
-            android:id="@+id/input_password"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/label_spinner"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Senha" />
-    </android.support.design.widget.TextInputLayout>
+            android:layout_marginLeft="5dp"
+            android:text="Setlist"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/spinner_setlists"
+            android:layout_width="312dp"
+            android:layout_height="41dp"
+            android:spinnerMode="dialog">
+
+        </android.support.v7.widget.AppCompatSpinner>
+    </LinearLayout>
+
+
+<android.support.design.widget.TextInputLayout
+    android:id="@+id/layout_input_password"
+    android:layout_width="312dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="15dp"
+    android:layout_marginEnd="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/layout_spinner">
+
+    <android.support.design.widget.TextInputEditText
+        android:id="@+id/input_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Senha"
+        android:inputType="textPassword" />
+</android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/buttonIniciar"
@@ -71,41 +92,37 @@
         app:layout_constraintHorizontal_bias="0.486"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_input_password"
-        app:layout_constraintVertical_bias="0.783" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <Button
         android:id="@+id/button_stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="116dp"
         android:text="Parar"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.486"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_input_password"
-        app:layout_constraintVertical_bias="0.783" />
+        app:layout_constraintBottom_toBottomOf="@+id/buttonIniciar"
+        app:layout_constraintEnd_toEndOf="@+id/buttonIniciar"
+        app:layout_constraintStart_toStartOf="@+id/buttonIniciar"
+        app:layout_constraintTop_toTopOf="@+id/buttonIniciar"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <TextView
-        android:id="@+id/msg_not_setlists"
-        android:layout_width="297dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:visibility="invisible"
-        android:text="Não é possível configurar o servidor. Nenhuma setlist criada!"
-        android:textAlignment="center"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.499" />
+<TextView
+    android:id="@+id/msg_not_setlists"
+    android:layout_width="297dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="8dp"
+    android:visibility="invisible"
+    android:text="Não é possível configurar o servidor. Nenhuma setlist criada!"
+    android:textAlignment="center"
+    android:textSize="18sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.499" />
 
 
 </android.support.constraint.ConstraintLayout>

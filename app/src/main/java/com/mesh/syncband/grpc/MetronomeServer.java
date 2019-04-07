@@ -100,10 +100,11 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
         currentSong = songList.get(position);
     }
 
-    public void notifySong(Long start) {
+    public void notifySong() {
         SongStart build = SongStart.newBuilder().setName(currentSong.getName())
                 .setArtist(currentSong.getArtist()).setBpm(currentSong.getBpm())
-                .setStamp(String.valueOf(start)).build();
+                .build();
+//        .setStamp(String.valueOf(start))
         Data data = Data.newBuilder().setType(Data.Type.SONG_START)
                 .setSong(build).build();
         for(Map.Entry<DeviceData, StreamObserver<Data>> observerEntry: observers.entrySet()){
@@ -157,7 +158,6 @@ public class MetronomeServer extends MetronomeServiceGrpc.MetronomeServiceImplBa
         }else{
             Data flowSuccess = Data.newBuilder().setType(Data.Type.AUTHORIZATION_SUCCESS).build();
             responseObserver.onNext(flowSuccess);
-
             observers.put(request.getDevice(), responseObserver);
         }
     }

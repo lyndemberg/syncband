@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.activities.interfaces.ActivityBindMetronome;
 import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
@@ -31,6 +33,7 @@ import com.mesh.syncband.model.Song;
 import com.mesh.syncband.valueobject.ServerTaskProgress;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,15 +53,18 @@ public class ServerFragment extends Fragment {
     private TextInputLayout layoutPassword;
     private TextInputEditText inputPassword;
     private TextView messageEmptySetlists;
-    private Spinner spinnerSetlists;
+    private TextView labelSpinner;
+    private AppCompatSpinner spinnerSetlists;
     private Button buttonIniciar;
     private Button buttonStop;
-    private Setlist selected;
+    private String setlistSelected;
+
 
     private Observer<List<String>> observerListSetlists = new Observer<List<String>>() {
         @Override
         public void onChanged(@Nullable List<String> strings) {
             if(strings.isEmpty()){
+                labelSpinner.setVisibility(View.INVISIBLE);
                 spinnerSetlists.setVisibility(View.INVISIBLE);
                 buttonIniciar.setVisibility(View.INVISIBLE);
                 buttonStop.setVisibility(View.INVISIBLE);
@@ -67,20 +73,16 @@ public class ServerFragment extends Fragment {
             }else{
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, strings);
                 spinnerSetlists.setAdapter(adapter);
+                labelSpinner.setVisibility(View.VISIBLE);
                 spinnerSetlists.setVisibility(View.VISIBLE);
                 buttonIniciar.setVisibility(View.VISIBLE);
                 buttonStop.setVisibility(View.INVISIBLE);
                 layoutPassword.setVisibility(View.VISIBLE);
                 messageEmptySetlists.setVisibility(View.INVISIBLE);
             }
-
         }
+
     };
-
-
-    public ServerFragment() {
-    }
-
 
     @Override
     public void onAttach(Context context) {
@@ -98,6 +100,7 @@ public class ServerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_server, container, false);
         spinnerSetlists = view.findViewById(R.id.spinner_setlists);
+        labelSpinner = view.findViewById(R.id.label_spinner);
         layoutPassword = view.findViewById(R.id.layout_input_password);
         inputPassword = view.findViewById(R.id.input_password);
         buttonIniciar = view.findViewById(R.id.buttonIniciar);
@@ -107,6 +110,8 @@ public class ServerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 metronomeServer.stop();
+                ((ActivityBindMetronome) getActivity()).getMetronomeService().pause();
+                refreshSpinnerSetlists();
                 ((ActivityHandlerDrawer) getActivity()).enableDrawerServer();
             }
         });
@@ -114,7 +119,7 @@ public class ServerFragment extends Fragment {
         buttonIniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String setlistSelected = spinnerSetlists.getSelectedItem().toString();
+                setlistSelected = spinnerSetlists.getSelectedItem().toString();
                 String password = inputPassword.getText().toString();
                 if(password==null || password.equals("")){
                     Toast.makeText(getContext(),"Preencha o campo da senha",Toast.LENGTH_LONG).show();
@@ -129,19 +134,25 @@ public class ServerFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        getActivity().setTitle("Server");
         super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
     public void onStart() {
-        setlistRepository.getAllNames().observe(this, observerListSetlists);
         if(metronomeServer.isRunning()){
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, Arrays.asList(setlistSelected));
+            spinnerSetlists.setAdapter(adapter);
             updateViewInRunning();
         }else{
             updateViewWhenNotRunning();
+            refreshSpinnerSetlists();
         }
         super.onStart();
+    }
+
+    private void refreshSpinnerSetlists(){
+        setlistRepository.getAllNames().observe(this, observerListSetlists);
     }
 
     @Override

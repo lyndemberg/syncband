@@ -3,11 +3,15 @@ package com.mesh.syncband.fragments;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.text.InputType;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,7 +68,8 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
     private ImageButton nextButton;
     private Button buttonPlayPause;
     private TextView msgWaiting;
-
+    private AudioManager audioManager = null;
+    private SeekBar volumeBar;
     private IMetronome localMetronome;
 
     @Override
@@ -75,12 +81,12 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.audioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        localMetronome = ((ActivityBindMetronome) getActivity()).getMetronomeService();
     }
 
     @Override
@@ -90,9 +96,31 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
         buttonSearch = view.findViewById(R.id.button_search);
         buttonPlayPause = view.findViewById(R.id.button_play_pause);
-
+        volumeBar = view.findViewById(R.id.volume);
+        volumeBar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        volumeBar.setProgress(audioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
         previousButton = view.findViewById(R.id.button_previous);
         nextButton = view.findViewById(R.id.button_next);
+
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onStopTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar arg0)
+            {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar arg0, int progress, boolean arg2)
+            {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                        progress, 0);
+            }
+        });
 
         buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,27 +156,26 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         buttonPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(localMetronome != null){
-                    if(localMetronome.isPlaying()){
-                        localMetronome.pause();
+                if(((ActivityBindMetronome) getActivity()).getMetronomeService() != null){
+                    if(((ActivityBindMetronome) getActivity()).getMetronomeService().isPlaying()){
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 metronomeServer.notifyPause();
                             }
                         }).start();
+                        ((ActivityBindMetronome) getActivity()).getMetronomeService().pause();
                         buttonPlayPause.setText("Tocar");
                         showButtonsPreviousAndNext();
                     }else{
-                        final long start = System.currentTimeMillis();
-                        Log.d(TAG,"START---->"+start);
-                        localMetronome.play(metronomeServer.getCurrentSong().getBpm(),start);
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                metronomeServer.notifySong(start);
-                            }
-                        }).start();
+//                        new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//
+//                            }
+//                        }).start();
+                        metronomeServer.notifySong();
+                        ((ActivityBindMetronome) getActivity()).getMetronomeService().play(metronomeServer.getCurrentSong().getBpm());
                         buttonPlayPause.setText("Pausar");
                         hideButtonsPreviousAndNext();
                     }
@@ -286,7 +313,6 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
     @Override
     public void onStart() {
-        super.onStart();
         if(metronomeServer.isRunning()){
             showInServer();
         }else if(metronomeClient.isConnected()){
@@ -294,6 +320,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
         }else{
             showInSearch();
         }
+        super.onStart();
     }
 
     @Override
@@ -303,9 +330,11 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
 
     @Override
     public void notifyServerSelected(final DeviceData deviceData) {
+
         final EditText inputPassword = new EditText(getContext());
+        inputPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Insira a senha");
+        builder.setTitle("Conectar-se a servidor");
         builder.setMessage("Server: " + deviceData.getNickname());
         builder.setView(inputPassword);
         builder.setCancelable(false);
@@ -385,7 +414,7 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
                 case DISCONNECT:
                     Toast.makeText(getContext(), "Você está desconectado!",Toast.LENGTH_LONG).show();
                     metronomeClient.setConnected(false);
-                    ((ActivityBindMetronome)getActivity()).getMetronomeService().pause();
+                    ((ActivityBindMetronome) getActivity()).getMetronomeService().pause();
                     metronomeClient.setClientData(null);
                     metronomeClient.setServerData(null);
                     metronomeClient.setCurrentSong(null);
@@ -394,14 +423,13 @@ public class HomeFragment extends Fragment implements ListServersDialog.ListServ
                     break;
                 case SONG_START:
                     SongStart start = flow.getSong();
-                    ((ActivityBindMetronome)getActivity()).getMetronomeService().play(start.getBpm(),Long.valueOf(start.getStamp()));
-                    Log.d(TAG,"START---->"+start.getStamp());
+                    ((ActivityBindMetronome) getActivity()).getMetronomeService().play(start.getBpm());
                     Song song = new Song(start.getName(), start.getArtist(), start.getBpm());
                     metronomeClient.setCurrentSong(song);
                     updateCurrentSongInView(song);
                     break;
                 case SONG_PAUSE:
-                    ((ActivityBindMetronome)getActivity()).getMetronomeService().pause();
+                    ((ActivityBindMetronome) getActivity()).getMetronomeService().pause();
                     updateNotSong();
                     metronomeClient.setCurrentSong(null);
                     break;

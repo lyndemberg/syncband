@@ -10,7 +10,6 @@ message SongStart{
     string name = 1;
     string artist = 2;
     int32 bpm = 3;
-    string stamp = 4;
 }
 message Data{
     enum Type {
