@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.mesh.syncband.MainApplication;
 import com.mesh.syncband.R;
+import com.mesh.syncband.activities.interfaces.ActivityBindMetronome;
 import com.mesh.syncband.activities.interfaces.ActivityHandlerDrawer;
 import com.mesh.syncband.database.ProfileRepository;
 import com.mesh.syncband.database.SetlistRepository;
@@ -52,6 +53,7 @@ public class ServerFragment extends Fragment {
     private TextInputLayout layoutPassword;
     private TextInputEditText inputPassword;
     private TextView messageEmptySetlists;
+    private TextView labelSpinner;
     private AppCompatSpinner spinnerSetlists;
     private Button buttonIniciar;
     private Button buttonStop;
@@ -62,6 +64,7 @@ public class ServerFragment extends Fragment {
         @Override
         public void onChanged(@Nullable List<String> strings) {
             if(strings.isEmpty()){
+                labelSpinner.setVisibility(View.INVISIBLE);
                 spinnerSetlists.setVisibility(View.INVISIBLE);
                 buttonIniciar.setVisibility(View.INVISIBLE);
                 buttonStop.setVisibility(View.INVISIBLE);
@@ -70,6 +73,7 @@ public class ServerFragment extends Fragment {
             }else{
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, strings);
                 spinnerSetlists.setAdapter(adapter);
+                labelSpinner.setVisibility(View.VISIBLE);
                 spinnerSetlists.setVisibility(View.VISIBLE);
                 buttonIniciar.setVisibility(View.VISIBLE);
                 buttonStop.setVisibility(View.INVISIBLE);
@@ -96,6 +100,7 @@ public class ServerFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_server, container, false);
         spinnerSetlists = view.findViewById(R.id.spinner_setlists);
+        labelSpinner = view.findViewById(R.id.label_spinner);
         layoutPassword = view.findViewById(R.id.layout_input_password);
         inputPassword = view.findViewById(R.id.input_password);
         buttonIniciar = view.findViewById(R.id.buttonIniciar);
@@ -105,6 +110,7 @@ public class ServerFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 metronomeServer.stop();
+                ((ActivityBindMetronome) getActivity()).getMetronomeService().pause();
                 refreshSpinnerSetlists();
                 ((ActivityHandlerDrawer) getActivity()).enableDrawerServer();
             }

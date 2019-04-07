@@ -7,6 +7,7 @@ import com.mesh.syncband.fragments.PerfilFragment;
 import com.mesh.syncband.fragments.ServerFragment;
 import com.mesh.syncband.fragments.SetlistsFragment;
 import com.mesh.syncband.fragments.dialog.AuthenticationDialog;
+import com.mesh.syncband.services.MetronomeService;
 
 import javax.inject.Singleton;
 

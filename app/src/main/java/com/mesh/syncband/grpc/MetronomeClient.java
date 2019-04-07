@@ -34,6 +34,7 @@ public class MetronomeClient {
         return connect;
     }
 
+
     public void disconnect() throws InterruptedException {
         if(isConnected){
             MetronomeServiceGrpc.MetronomeServiceBlockingStub stub = MetronomeServiceGrpc.newBlockingStub(channel);
